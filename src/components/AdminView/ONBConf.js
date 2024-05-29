@@ -13,6 +13,13 @@ function ONBConf() {
         nombrE_CARGO: '',
         descripcion: ''
     });
+    const [taskCargo, setTaskCargo] = useState(null); // Nuevo estado para tareas
+    const [tasks, setTasks] = useState({
+        acuerdoConfidencialidad: false,
+        procesoDisciplinario: false,
+        declaracionJurada: false,
+        pagoSubvenciones: false
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -68,6 +75,30 @@ function ONBConf() {
             ...editedCargo,
             [name]: value
         });
+    };
+
+    const handleTaskChange = (e) => {
+        const { name, checked } = e.target;
+        setTasks({
+            ...tasks,
+            [name]: checked
+        });
+    };
+
+    const handleTasks = (cargo) => {
+        setTaskCargo(cargo);
+        // Inicializar tasks si hay datos disponibles para el cargo
+        // Aquí deberías cargar el estado real de las tareas desde la base de datos si es necesario
+        setTasks({
+            acuerdoConfidencialidad: false,
+            procesoDisciplinario: false,
+            declaracionJurada: false,
+            pagoSubvenciones: false
+        });
+    };
+
+    const handleCloseTasks = () => {
+        setTaskCargo(null);
     };
 
     if (loading) {
@@ -131,15 +162,103 @@ function ONBConf() {
                                         </button>
                                     </>
                                 ) : (
-                                    <button className="btn btn-warning btn-sm" onClick={() => handleEdit(cargo)}>
-                                        Editar
-                                    </button>
+                                    <>
+                                        <button className="btn btn-warning btn-sm me-1" onClick={() => handleEdit(cargo)}>
+                                            Editar
+                                        </button>
+                                        <button className="btn btn-info btn-sm" onClick={() => handleTasks(cargo)}>
+                                            Tareas
+                                        </button>
+                                    </>
                                 )}
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
+
+            {taskCargo && (
+                <>
+                    <div className="modal-overlay show"></div>
+                    <div className="modal" style={{ display: 'block' }}>
+                        <div className="modal-dialog">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Tareas para {taskCargo.nombrE_CARGO}</h5>
+                                    <button type="button" className="close" onClick={handleCloseTasks}>
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    <table className="table">
+                                        <tbody>
+                                            <tr>
+                                                <td>Acuerdo de Confidencialidad</td>
+                                                <td>
+                                                    <div className="form-check form-switch">
+                                                        <input
+                                                            className="form-check-input"
+                                                            type="checkbox"
+                                                            name="acuerdoConfidencialidad"
+                                                            checked={tasks.acuerdoConfidencialidad}
+                                                            onChange={handleTaskChange}
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Proceso Disciplinario</td>
+                                                <td>
+                                                    <div className="form-check form-switch">
+                                                        <input
+                                                            className="form-check-input"
+                                                            type="checkbox"
+                                                            name="procesoDisciplinario"
+                                                            checked={tasks.procesoDisciplinario}
+                                                            onChange={handleTaskChange}
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Declaración Jurada de no tener antecedentes penales ni judiciales</td>
+                                                <td>
+                                                    <div className="form-check form-switch">
+                                                        <input
+                                                            className="form-check-input"
+                                                            type="checkbox"
+                                                            name="declaracionJurada"
+                                                            checked={tasks.declaracionJurada}
+                                                            onChange={handleTaskChange}
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Pago de Subvenciones</td>
+                                                <td>
+                                                    <div className="form-check form-switch">
+                                                        <input
+                                                            className="form-check-input"
+                                                            type="checkbox"
+                                                            name="pagoSubvenciones"
+                                                            checked={tasks.pagoSubvenciones}
+                                                            onChange={handleTaskChange}
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={handleCloseTasks}>Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

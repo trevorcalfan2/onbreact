@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import '../css/Login.css';
 import config from '../config';
+
 function Login(props) {
     const baseUrl = `${config.API_URL}/usuarios`;
     const baseUrlAd = `${config.API_URL}/admins`;
@@ -17,14 +18,19 @@ function Login(props) {
         password: ''
     });
     const [isAdminView, setIsAdminView] = useState(false);
+    const [alert, setAlert] = useState({
+        show: false,
+        message: '',
+        variant: 'danger'
+    });
 
     useEffect(() => {
-        if (cookies.get('useR_ID')  ) {
+        if (cookies.get('useR_ID')) {
             navigate("/menu");
         }
-        if (cookies.get('id')  ) {
-          navigate("/menuadmin");
-      }
+        if (cookies.get('id')) {
+            navigate("/menuadmin");
+        }
     }, [cookies, navigate]);
 
     const handleChange = e => {
@@ -37,61 +43,80 @@ function Login(props) {
 
     const iniciarSesion = async () => {
         const url = isAdminView ? baseUrlAd : baseUrl;
-        await axios.get(`${url}/${form.email}/${md5(form.password)}`)
-            .then(response => {
-                return response.data;
-            }).then(response => {
 
+        try {
+            const response = await axios.get(`${url}/${form.email}/${md5(form.password)}`);
+            const respuesta = response.data;
 
-                if (response.length > 0) {
+            if (respuesta.length > 0) {
+                const user = respuesta[0];
 
+                if (user.estado !== 'true') {
+                    setAlert({
+                        show: true,
+                        message: 'El usuario no está activo. Por favor, contacte con el administrador.',
+                        variant: 'warning'
+                    });
+                    return;
+                }
 
-
-
-                    const respuesta = response[0];
-
-
-                    if(isAdminView){
-                    cookies.set('id', respuesta.id, { path: '/' });
-                    cookies.set('nombre', respuesta.nombre, { path: '/' });
-                    cookies.set('apellido', respuesta.apellido, { path: '/' });
-                    cookies.set('email', respuesta.email, { path: '/' });
-                    cookies.set('estado', respuesta.estado, { path: '/' });
-                    cookies.set('reG_DATE', respuesta.reG_DATE, { path: '/' });
-                    cookies.set('uP_DATE', respuesta.uP_DATE, { path: '/' });
-                   
-                  }
-                    else{
-                      cookies.set('useR_ID', respuesta.useR_ID, { path: '/' });
-                      cookies.set('nombre', respuesta.nombre, { path: '/' });
-                      cookies.set('apellido', respuesta.apellido, { path: '/' });
-                      cookies.set('email', respuesta.email, { path: '/' });
-                      cookies.set('fechaicontrato', respuesta.fechaicontrato, { path: '/' });
-                      cookies.set('estado', respuesta.estado, { path: '/' });
-                      cookies.set('reG_DATE', respuesta.reG_DATE, { path: '/' });
-                      cookies.set('uP_DATE', respuesta.uP_DATE, { path: '/' });
-                      cookies.set('llog', respuesta.llog, { path: '/' });
-                      cookies.set('iD_CARGO', respuesta.iD_CARGO, { path: '/' });
-                      cookies.set('isadmin',isAdminView, { path: '/' })
-                    }
-
-
+                if (isAdminView) {
+                    cookies.set('id', user.id, { path: '/' });
+                    cookies.set('nombre', user.nombre, { path: '/' });
+                    cookies.set('apellido', user.apellido, { path: '/' });
+                    cookies.set('email', user.email, { path: '/' });
+                    cookies.set('estado', user.estado, { path: '/' });
+                    cookies.set('reG_DATE', user.reG_DATE, { path: '/' });
+                    cookies.set('uP_DATE', user.uP_DATE, { path: '/' });
+                } else {
+                    cookies.set('useR_ID', user.useR_ID, { path: '/' });
+                    cookies.set('nombre', user.nombre, { path: '/' });
+                    cookies.set('apellido', user.apellido, { path: '/' });
+                    cookies.set('email', user.email, { path: '/' });
+                    cookies.set('fechaicontrato', user.fechaicontrato, { path: '/' });
+                    cookies.set('estado', user.estado, { path: '/' });
+                    cookies.set('reG_DATE', user.reG_DATE, { path: '/' });
+                    cookies.set('uP_DATE', user.uP_DATE, { path: '/' });
+                    cookies.set('llog', user.llog, { path: '/' });
+                    cookies.set('iD_CARGO', user.iD_CARGO, { path: '/' });
                     cookies.set('isadmin', isAdminView, { path: '/' });
 
-
-                    navigate(isAdminView ? "/menuadmin" : "/menu");
-
-
-                    document.body.classList.remove('admin-view');
-
-
-                } else {
-                    alert('El usuario o la contraseña no son correctos');
+                    // Actualizar LLOG
+                    const updatedUser = {
+                        ...user,
+                        llog: new Date().toISOString()
+                    };
+                    await axios.put(`${baseUrl}/${user.useR_ID}`, updatedUser);
                 }
-            })
-            .catch(error => {
-                console.log(error);
-            });
+
+                cookies.set('isadmin', isAdminView, { path: '/' });
+
+                navigate(isAdminView ? "/menuadmin" : "/menu");
+
+                document.body.classList.remove('admin-view');
+            } else {
+                setAlert({
+                    show: true,
+                    message: 'El usuario o la contraseña no son correctos',
+                    variant: 'danger'
+                });
+            }
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                setAlert({
+                    show: true,
+                    message: 'El usuario o la contraseña no son correctos',
+                    variant: 'danger'
+                });
+            } else {
+                console.error('Error:', error);
+                setAlert({
+                    show: true,
+                    message: 'Error de conexión. Por favor, inténtelo de nuevo más tarde.',
+                    variant: 'danger'
+                });
+            }
+        }
     }
 
     const cambiarVistaAdmin = () => {
@@ -136,6 +161,11 @@ function Login(props) {
                                 {isAdminView ? 'Cambiar a Cliente' : 'Cambiar a Administrador'}
                             </span>
                         </div>
+                        {alert.show && (
+                            <div className={`alert alert-${alert.variant} mt-3`} role="alert">
+                                {alert.message}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
