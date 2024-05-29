@@ -14,7 +14,7 @@ p {
 }
 
 .no-background {
-    background-color: transparent !importante;
+    background-color: transparent !important;
 }
 
 .no-background:focus {

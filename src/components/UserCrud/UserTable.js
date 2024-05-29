@@ -19,7 +19,9 @@ function UserTable({ setView }) {
         ID_CARGO: '',
         ESTADO: '',
         PASSWORD: '',
-        ORIGINAL_PASSWORD: '' // Para mantener la contraseña original
+        ORIGINAL_PASSWORD: '', // Para mantener la contraseña original
+        REG_DATE: '', // Añadir REG_DATE al estado del usuario editado
+        UP_DATE: ''
     });
 
     const fetchUsers = () => {
@@ -27,7 +29,7 @@ function UserTable({ setView }) {
             .then(response => {
                 const usuarios = response.data.map(user => {
                     let cargo;
-                    switch (user.ID_CARGO) {
+                    switch (user.iD_CARGO) {
                         case 1:
                             cargo = 'Analista';
                             break;
@@ -45,15 +47,17 @@ function UserTable({ setView }) {
                     }
 
                     return {
-                        cargo: user.ID_CARGO,
-                        id: user.USER_ID,
-                        nombre: user.NOMBRE,
-                        apellido: user.APELLIDO,
-                        email: user.EMAIL,
+                        cargo: user.iD_CARGO,
+                        id: user.useR_ID,
+                        nombre: user.nombre,
+                        apellido: user.apellido,
+                        email: user.email,
                         cargoname: cargo,
-                        estado: user.ESTADO,
-                        password: user.PASSWORD,
-                        log: user.LLOG,
+                        estado: user.estado,
+                        password: user.password,
+                        log: user.llog,
+                        reg_date: user.reG_DATE,
+                        up_date: user.uP_DATE, // Incluir UP_DATE en los datos del usuario
                         progress: 75
                     };
                 });
@@ -74,7 +78,9 @@ function UserTable({ setView }) {
             ID_CARGO: user.cargo,
             ESTADO: user.estado,
             PASSWORD: '', // Vaciar la contraseña para detectar si se actualiza
-            ORIGINAL_PASSWORD: user.password // Mantener la contraseña original
+            ORIGINAL_PASSWORD: user.password, // Mantener la contraseña original
+            REG_DATE: user.reg_date, // Mantener REG_DATE sin cambios
+            UP_DATE: user.up_date // Mantener UP_DATE sin cambios
         });
     };
 
@@ -109,15 +115,17 @@ function UserTable({ setView }) {
         let updatedUser = {
             ...editedUser,
             ID_CARGO: parseInt(editedUser.ID_CARGO),
-            UP_DATE: new Date().toISOString(),
-            PASSWORD: editedUser.PASSWORD ? CryptoJS.MD5(editedUser.PASSWORD).toString() : editedUser.ORIGINAL_PASSWORD
+            UP_DATE: new Date().toISOString(), // Agregar la fecha de actualización
+            PASSWORD: editedUser.PASSWORD ? CryptoJS.MD5(editedUser.PASSWORD).toString() : editedUser.ORIGINAL_PASSWORD,
+            LLOG: users.find(user => user.id === editingUser).log, // Mantener el valor de LLOG
+            REG_DATE: editedUser.REG_DATE // Mantener el valor de REG_DATE sin cambios
         };
 
         axios.put(`${config.API_URL}/usuarios/${editingUser}`, updatedUser)
             .then(response => {
                 fetchUsers();
                 setEditingUser(null);
-                setEditedUser({ USER_ID: '', NOMBRE: '', APELLIDO: '', EMAIL: '', ID_CARGO: '', ESTADO: '', PASSWORD: '', ORIGINAL_PASSWORD: '' });
+                setEditedUser({ USER_ID: '', NOMBRE: '', APELLIDO: '', EMAIL: '', ID_CARGO: '', ESTADO: '', PASSWORD: '', ORIGINAL_PASSWORD: '', REG_DATE: '', UP_DATE: '' });
             })
             .catch(error => {
                 console.error('Error al actualizar el usuario:', error);
@@ -203,6 +211,8 @@ function UserTable({ setView }) {
                                     <p><strong>Cargo:</strong> {viewingUser.cargoname}</p>
                                     <p><strong>Estado:</strong> {viewingUser.estado === 'true' ? 'Activo' : 'Inactivo'}</p>
                                     <p><strong>Último Log:</strong> {viewingUser.log}</p>
+                                    <p><strong>Fecha de Registro:</strong> {viewingUser.reg_date}</p> {/* Mostrar REG_DATE */}
+                                    <p><strong>Última Actualización:</strong> {viewingUser.up_date}</p> {/* Mostrar UP_DATE */}
                                     <p><strong>Documentos:</strong> {/* Aquí puedes agregar la lógica para mostrar los documentos */}</p>
                                 </div>
                                 <div className="modal-footer">

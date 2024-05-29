@@ -50,19 +50,32 @@ function CreateUser({ setView }) {
 
     const handleConfirmSubmit = async () => {
         handleCloseModal();
+    
+        const formatLocalDateTime = () => {
+            const date = new Date();
+            const pad = (num) => (num < 10 ? '0' + num : num);
+            const year = date.getFullYear();
+            const month = pad(date.getMonth() + 1);
+            const day = pad(date.getDate());
+            const hours = pad(date.getHours());
+            const minutes = pad(date.getMinutes());
+            const seconds = pad(date.getSeconds());
+            return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+        };
+    
         const usuario = {
             NOMBRE: form.nombre,
             APELLIDO: form.apellido,
             EMAIL: form.email,
             FECHAICONTRATO: form.fechaiContrato,
-            ESTADO: form.estado === 'Activo' ? 'true' : 'false', // Conversión del estado
-            PASSWORD: CryptoJS.MD5(form.password).toString(), // Codificación en MD5
+            ESTADO: form.estado === 'Activo' ? 'true' : 'false',
+            PASSWORD: CryptoJS.MD5(form.password).toString(),
             ID_CARGO: form.idCargo,
-            REG_DATE: new Date().toISOString(),
+            REG_DATE: formatLocalDateTime(),
             UP_DATE: null,
             LLOG: null
         };
-
+    
         try {
             const response = await fetch(`${config.API_URL}/usuarios`, {
                 method: 'POST',
@@ -75,12 +88,14 @@ function CreateUser({ setView }) {
                 console.log('Usuario creado con éxito');
                 setView('user');
             } else {
-                console.error('Error al crear el usuario');
+                const errorData = await response.json();
+                console.error('Error al crear el usuario', errorData);
             }
         } catch (error) {
             console.error('Error de conexión', error);
         }
     };
+    
 
     const handleSubmit = e => {
         e.preventDefault();
