@@ -14,14 +14,10 @@ function ONBConf() {
         descripcion: ''
     });
     const [taskCargo, setTaskCargo] = useState(null); // Nuevo estado para tareas
-    const [tasks, setTasks] = useState({
-        acuerdoConfidencialidad: false,
-        procesoDisciplinario: false,
-        declaracionJurada: false,
-        pagoSubvenciones: false
-    });
+    const [tasks, setTasks] = useState([]); // Cambiado a array para manejar múltiples tareas
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [taskError, setTaskError] = useState(null); // Nuevo estado para errores de tareas
 
     useEffect(() => {
         fetchCargos();
@@ -39,6 +35,31 @@ function ONBConf() {
                 console.error('Error al obtener los cargos:', error);
                 setError('Error al obtener los cargos');
                 setLoading(false);
+            });
+    };
+
+    const fetchTasks = (cargoId) => {
+        axios.get(`${config.API_URL}/tareas`)
+            .then(response => {
+                const allTasks = response.data;
+                // Fetch tasks for the selected cargo
+                axios.get(`${config.API_URL}/packs/cargo/${cargoId}`)
+                    .then(packResponse => {
+                        const packTasks = packResponse.data;
+                        const tasksWithState = allTasks.map(task => ({
+                            ...task,
+                            completed: packTasks.some(pack => pack.iD_TAREA === task.iD_TAREA)
+                        }));
+                        setTasks(tasksWithState);
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener las tareas del cargo:', error);
+                        setError('Error al obtener las tareas del cargo');
+                    });
+            })
+            .catch(error => {
+                console.error('Error al obtener las tareas:', error);
+                setError('Error al obtener las tareas');
             });
     };
 
@@ -79,26 +100,42 @@ function ONBConf() {
 
     const handleTaskChange = (e) => {
         const { name, checked } = e.target;
-        setTasks({
-            ...tasks,
-            [name]: checked
-        });
+        setTasks(tasks.map(task =>
+            task.iD_TAREA === parseInt(name) ? { ...task, completed: checked } : task
+        ));
     };
 
     const handleTasks = (cargo) => {
         setTaskCargo(cargo);
-        // Inicializar tasks si hay datos disponibles para el cargo
-        // Aquí deberías cargar el estado real de las tareas desde la base de datos si es necesario
-        setTasks({
-            acuerdoConfidencialidad: false,
-            procesoDisciplinario: false,
-            declaracionJurada: false,
-            pagoSubvenciones: false
-        });
+        fetchTasks(cargo.iD_CARGO);
+    };
+
+    const handleSaveTasks = () => {
+        const tasksToSave = tasks.filter(task => task.completed);
+        if (tasksToSave.length === 0) {
+            setTaskError('Debe seleccionar al menos una tarea');
+            return;
+        }
+
+        const packsToSave = tasksToSave.map(task => ({
+            iD_CARGO: taskCargo.iD_CARGO,
+            iD_TAREA: task.iD_TAREA
+        }));
+
+        axios.post(`${config.API_URL}/packs/bulk`, packsToSave)
+            .then(response => {
+                console.log('Tareas guardadas correctamente');
+                handleCloseTasks();
+            })
+            .catch(error => {
+                console.error('Error al guardar las tareas:', error);
+                setError('Error al guardar las tareas');
+            });
     };
 
     const handleCloseTasks = () => {
         setTaskCargo(null);
+        setTaskError(null); // Restablecer el error al cerrar el modal
     };
 
     if (loading) {
@@ -190,68 +227,34 @@ function ONBConf() {
                                     </button>
                                 </div>
                                 <div className="modal-body">
+                                    {taskError && (
+                                        <div className="alert alert-danger" role="alert">
+                                            {taskError}
+                                        </div>
+                                    )}
                                     <table className="table">
                                         <tbody>
-                                            <tr>
-                                                <td>Acuerdo de Confidencialidad</td>
-                                                <td>
-                                                    <div className="form-check form-switch">
-                                                        <input
-                                                            className="form-check-input"
-                                                            type="checkbox"
-                                                            name="acuerdoConfidencialidad"
-                                                            checked={tasks.acuerdoConfidencialidad}
-                                                            onChange={handleTaskChange}
-                                                        />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Proceso Disciplinario</td>
-                                                <td>
-                                                    <div className="form-check form-switch">
-                                                        <input
-                                                            className="form-check-input"
-                                                            type="checkbox"
-                                                            name="procesoDisciplinario"
-                                                            checked={tasks.procesoDisciplinario}
-                                                            onChange={handleTaskChange}
-                                                        />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Declaración Jurada de no tener antecedentes penales ni judiciales</td>
-                                                <td>
-                                                    <div className="form-check form-switch">
-                                                        <input
-                                                            className="form-check-input"
-                                                            type="checkbox"
-                                                            name="declaracionJurada"
-                                                            checked={tasks.declaracionJurada}
-                                                            onChange={handleTaskChange}
-                                                        />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Pago de Subvenciones</td>
-                                                <td>
-                                                    <div className="form-check form-switch">
-                                                        <input
-                                                            className="form-check-input"
-                                                            type="checkbox"
-                                                            name="pagoSubvenciones"
-                                                            checked={tasks.pagoSubvenciones}
-                                                            onChange={handleTaskChange}
-                                                        />
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            {tasks.map(task => (
+                                                <tr key={task.iD_TAREA}>
+                                                    <td>{task.nombrE_TAREA}</td>
+                                                    <td>
+                                                        <div className="form-check form-switch">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                name={task.iD_TAREA.toString()}
+                                                                checked={task.completed}
+                                                                onChange={handleTaskChange}
+                                                            />
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
                                         </tbody>
                                     </table>
                                 </div>
                                 <div className="modal-footer">
+                                    <button type="button" className="btn btn-primary" onClick={handleSaveTasks}>Guardar</button>
                                     <button type="button" className="btn btn-secondary" onClick={handleCloseTasks}>Cerrar</button>
                                 </div>
                             </div>

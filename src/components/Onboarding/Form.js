@@ -10,10 +10,15 @@ import SubvDocInfo from "./SubvDocInfo";
 import '../../css/Form.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import axios from 'axios';
+import config from '../../config';
+import Cookies from 'universal-cookie';
 
 function Form() {
+  const cookies = new Cookies();
   const [page, setPage] = useState(0);
   const [isFormComplete, setIsFormComplete] = useState(false);
+  const [activeTasks, setActiveTasks] = useState([]);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -33,20 +38,37 @@ function Form() {
     bbvaCuenta: "",
     otroCci: "",
     posicion: "",
-    agree: false, // Añadir el estado para el checkbox en ConfInfo
-    agreeDis: false, // Añadir el estado para el checkbox en DisInfo
-    agreeNoAnt: false, // Añadir el estado para el checkbox en NoAntInfo
-    agreeSubv: false // Añadir el estado para el checkbox en SubvDocInfo
+    agree: false,
+    agreeDis: false,
+    agreeNoAnt: false,
+    agreeSubv: false
   });
 
   useEffect(() => {
+    const fetchActiveTasks = async () => {
+      const cargoId = cookies.get('iD_CARGO');
+      if (cargoId) {
+        try {
+          const response = await axios.get(`${config.API_URL}/packs/cargo/${cargoId}`);
+          const taskIds = response.data.map(task => task.iD_TAREA);
+          setActiveTasks(taskIds);
+        } catch (error) {
+          console.error('Error fetching tasks:', error);
+        }
+      }
+    };
+    fetchActiveTasks();
+  }, [cookies]);
+
+  useEffect(() => {
     const checkFormCompletion = () => {
-      switch (page) {
-        case 0:
+      console.log("Checking form completion for page:", page);
+      console.log("Current formData:", formData);
+      switch (activeFormTitles[page]) {
+        case "Bienvenida":
+        case "Introducción":
           return true;
-        case 1:
-          return true;
-        case 2:
+        case "Información Personal":
           return (
             formData.nombre !== "" &&
             formData.apellido !== "" &&
@@ -55,39 +77,52 @@ function Form() {
             formData.distrito !== "" &&
             formData.fotoDni !== ""
           );
-        case 3:
-          return (
-            (formData.bbvaCuenta !== "" && formData.bbvaCuenta.length > 0) ||
-            (formData.otroCci !== "" && formData.otroCci.length > 0)
-          );
-        case 4:
+        case "Acuerdo de Confidencialidad SGSI":
           return formData.agree;
-        case 5:
+        case "Proceso Disciplinario SGSI":
           return formData.agreeDis;
-        case 6:
+        case "Declaración Jurada de No Tener Antecedentes Penales ni Judiciales SGSI":
           return formData.agreeNoAnt;
-        case 7:
+        case "Pago de Subvenciones":
+          return formData.bbvaCuenta !== "" || formData.otroCci !== "";
+        case "Pago de Subvenciones RRHH":
           return formData.agreeSubv;
         default:
           return false;
       }
     };
-    setIsFormComplete(checkFormCompletion());
-  }, [formData, page]);
+    const isComplete = checkFormCompletion();
+    setIsFormComplete(isComplete);
+    console.log("isFormComplete:", isComplete);
+  }, [formData, page, activeTasks]);
 
   const FormTitles = [
     "Bienvenida",
     "Introducción",
     "Información Personal",
-    "Pago de Subvenciones",
     "Acuerdo de Confidencialidad SGSI",
     "Proceso Disciplinario SGSI",
     "Declaración Jurada de No Tener Antecedentes Penales ni Judiciales SGSI",
+    "Pago de Subvenciones",
     "Pago de Subvenciones RRHH"
   ];
 
+  const getActiveFormTitles = () => {
+    let titles = ["Bienvenida", "Introducción", "Información Personal"];
+    if (activeTasks.includes(1)) titles.push("Acuerdo de Confidencialidad SGSI");
+    if (activeTasks.includes(2)) titles.push("Proceso Disciplinario SGSI");
+    if (activeTasks.includes(3)) titles.push("Declaración Jurada de No Tener Antecedentes Penales ni Judiciales SGSI");
+    if (activeTasks.includes(4)) {
+      titles.push("Pago de Subvenciones");
+      titles.push("Pago de Subvenciones RRHH");
+    }
+    return titles;
+  };
+
+  const activeFormTitles = getActiveFormTitles();
+
   const handleNextPage = () => {
-    if (page === FormTitles.length - 1) {
+    if (page === activeFormTitles.length - 1) {
       alert("FORM SUBMITTED");
       console.log(formData);
     } else {
@@ -95,23 +130,29 @@ function Form() {
     }
   };
 
+  const handlePreviousPage = () => {
+    if (page > 0) {
+      setPage(page - 1);
+    }
+  };
+
   const PageDisplay = () => {
-    switch (page) {
-      case 0:
+    switch (activeFormTitles[page]) {
+      case "Bienvenida":
         return <WInfo formData={formData} setFormData={setFormData} />;
-      case 1:
-        return <IntroInfo formData={formData} setFormData={setFormData} />;
-      case 2:
+      case "Introducción":
+        return <IntroInfo formData={formData} setFormData={setFormData} activeTasks={activeTasks} />;
+      case "Información Personal":
         return <PersonalInfo formData={formData} setFormData={setFormData} />;
-      case 3:
-        return <SubvInfo formData={formData} setFormData={setFormData} />;
-      case 4:
+      case "Acuerdo de Confidencialidad SGSI":
         return <ConfInfo formData={formData} setFormData={setFormData} />;
-      case 5:
+      case "Proceso Disciplinario SGSI":
         return <DisInfo formData={formData} setFormData={setFormData} />;
-      case 6:
+      case "Declaración Jurada de No Tener Antecedentes Penales ni Judiciales SGSI":
         return <NoAntInfo formData={formData} setFormData={setFormData} />;
-      case 7:
+      case "Pago de Subvenciones":
+        return <SubvInfo formData={formData} setFormData={setFormData} />;
+      case "Pago de Subvenciones RRHH":
         return <SubvDocInfo formData={formData} setFormData={setFormData} />;
       default:
         return null;
@@ -119,26 +160,8 @@ function Form() {
   };
 
   const progressBarWidth = () => {
-    switch (page) {
-      case 0:
-        return "12.5%";
-      case 1:
-        return "25%";
-      case 2:
-        return "37.5%";
-      case 3:
-        return "50%";
-      case 4:
-        return "62.5%";
-      case 5:
-        return "75%";
-      case 6:
-        return "87.5%";
-      case 7:
-        return "100%";
-      default:
-        return "0%";
-    }
+    const progressStep = 100 / activeFormTitles.length;
+    return `${progressStep * page}%`;
   };
 
   return (
@@ -155,7 +178,7 @@ function Form() {
       </div>
       <div className="container-lg">
         <div className="header">
-          <h1>{FormTitles[page]}</h1>
+          <h1>{activeFormTitles[page]}</h1>
         </div>
         <div className="body">
           <TransitionGroup component={null}>
@@ -166,23 +189,21 @@ function Form() {
         </div>
         <div className="footer">
           <button
-            className='btn btn-secondary btn-md me-2'
+            className="btn btn-secondary btn-md me-2"
             disabled={page === 0}
-            onClick={() => {
-              setPage(page - 1);
-            }}
+            onClick={handlePreviousPage}
           >
             Anterior
           </button>
-          
+
           <button
-            className='btn btn-primary btn-md'
+            className="btn btn-primary btn-md"
             onClick={handleNextPage}
             disabled={!isFormComplete}
           >
-            {page === FormTitles.length - 1 ? "Finalizar" : "Siguiente"}
+            {page === activeFormTitles.length - 1 ? "Finalizar" : "Siguiente"}
           </button>
-          <br/><br/><br/><br/>
+          <br /><br /><br /><br />
         </div>
       </div>
     </div>
@@ -190,3 +211,4 @@ function Form() {
 }
 
 export default Form;
+
