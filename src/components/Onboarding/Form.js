@@ -62,8 +62,7 @@ function Form() {
 
   useEffect(() => {
     const checkFormCompletion = () => {
-      console.log("Checking form completion for page:", page);
-      console.log("Current formData:", formData);
+     
       switch (activeFormTitles[page]) {
         case "Bienvenida":
         case "Introducción":
@@ -121,14 +120,33 @@ function Form() {
 
   const activeFormTitles = getActiveFormTitles();
 
-  const handleNextPage = () => {
+  const handleNextPage = async () => {
     if (page === activeFormTitles.length - 1) {
       alert("FORM SUBMITTED");
       console.log(formData);
+  
+      // Update the ONB_ESTADO to false
+      const userId = cookies.get('useR_ID');
+      try {
+        await axios.patch(`${config.API_URL}/usuarios/UpdateOnbEstado/${userId}`, { onB_ESTADO: false }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+  
+        // Update the cookie to reflect the change
+        cookies.set('onB_ESTADO', false, { path: '/' });
+        
+        // Reload the form to reflect the completion status
+        window.location.reload();
+      } catch (error) {
+        console.error('Error updating user status:', error);
+      }
     } else {
       setPage(page + 1);
     }
   };
+  
 
   const handlePreviousPage = () => {
     if (page > 0) {
@@ -211,4 +229,3 @@ function Form() {
 }
 
 export default Form;
-

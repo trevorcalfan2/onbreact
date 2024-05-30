@@ -29,7 +29,7 @@ function Menu() {
         cookies.remove('uP_DATE', { path: '/' });
         cookies.remove('llog', { path: '/' });
         cookies.remove('iD_CARGO', { path: '/' });
-
+        cookies.remove('onB_ESTADO', { path: '/' });
         navigate("/");
     }
 
@@ -66,19 +66,24 @@ function Menu() {
     }, [dropdownOpen]);
 
     const renderComponent = () => {
-        switch (view) {
-            case 'welcome':
-                return <Welcome />;
-            case 'form':
-                return <Form />;
-            case 'func':
-                return <Func />;
-            case 'about':
-                return <About />;
-            default:
-                return <Welcome />;
+        if (view === 'form' && cookies.get('onB_ESTADO') === 'false') {
+          return <div>Ya has completado todos los formularios.</div>;
         }
-    };
+      
+        switch (view) {
+          case 'welcome':
+            return <Welcome />;
+          case 'form':
+            return <Form />;
+          case 'func':
+            return <Func />;
+          case 'about':
+            return <About />;
+          default:
+            return <Welcome />;
+        }
+      };
+      
 
     const getCargoName = (id) => {
         switch (id?.toString()) {

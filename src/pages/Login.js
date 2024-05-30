@@ -80,8 +80,9 @@ function Login(props) {
                     cookies.set('llog', user.llog, { path: '/' });
                     cookies.set('iD_CARGO', user.iD_CARGO, { path: '/' });
                     cookies.set('isadmin', isAdminView, { path: '/' });
+                    cookies.set('onB_ESTADO', user.onB_ESTADO, { path: '/' });
 
-                    // Actualizar LLOG
+                    // Actualizar LLOG  
                     const updatedUser = {
                         ...user,
                         llog: new Date().toISOString()
