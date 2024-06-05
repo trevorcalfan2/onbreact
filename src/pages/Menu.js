@@ -66,15 +66,21 @@ function Menu() {
     }, [dropdownOpen]);
 
     const renderComponent = () => {
-        if (view === 'form' && cookies.get('onB_ESTADO') === 'false') {
-          return <div>Ya has completado todos los formularios.</div>;
-        }
+        const onBEstado = cookies.get('onB_ESTADO');
+        
+       
       
         switch (view) {
           case 'welcome':
             return <Welcome />;
           case 'form':
+            if (onBEstado === false) {
+                return <div>Ya has completado todos los formularios.</div>;
+            }
+           else{
             return <Form />;
+           }
+            
           case 'func':
             return <Func />;
           case 'about':

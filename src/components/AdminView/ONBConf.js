@@ -13,11 +13,13 @@ function ONBConf() {
         nombrE_CARGO: '',
         descripcion: ''
     });
-    const [taskCargo, setTaskCargo] = useState(null); // Nuevo estado para tareas
-    const [tasks, setTasks] = useState([]); // Cambiado a array para manejar múltiples tareas
+    const [taskCargo, setTaskCargo] = useState(null);
+    const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [taskError, setTaskError] = useState(null); // Nuevo estado para errores de tareas
+    const [taskError, setTaskError] = useState(null);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
 
     useEffect(() => {
         fetchCargos();
@@ -27,12 +29,10 @@ function ONBConf() {
         setLoading(true);
         axios.get(`${config.API_URL}/cargos`)
             .then(response => {
-                console.log('Cargos recibidos:', response.data);
                 setCargos(response.data);
                 setLoading(false);
             })
             .catch(error => {
-                console.error('Error al obtener los cargos:', error);
                 setError('Error al obtener los cargos');
                 setLoading(false);
             });
@@ -42,7 +42,6 @@ function ONBConf() {
         axios.get(`${config.API_URL}/tareas`)
             .then(response => {
                 const allTasks = response.data;
-                // Fetch tasks for the selected cargo
                 axios.get(`${config.API_URL}/packs/cargo/${cargoId}`)
                     .then(packResponse => {
                         const packTasks = packResponse.data;
@@ -53,12 +52,10 @@ function ONBConf() {
                         setTasks(tasksWithState);
                     })
                     .catch(error => {
-                        console.error('Error al obtener las tareas del cargo:', error);
                         setError('Error al obtener las tareas del cargo');
                     });
             })
             .catch(error => {
-                console.error('Error al obtener las tareas:', error);
                 setError('Error al obtener las tareas');
             });
     };
@@ -78,9 +75,10 @@ function ONBConf() {
                 fetchCargos();
                 setEditingCargo(null);
                 setEditedCargo({ iD_CARGO: '', nombrE_CARGO: '', descripcion: '' });
+                setToastMessage('La descripción del cargo se ha actualizado correctamente.');
+                setShowToast(true);
             })
             .catch(error => {
-                console.error('Error al actualizar el cargo:', error);
                 setError('Error al actualizar el cargo');
             });
     };
@@ -89,7 +87,6 @@ function ONBConf() {
         setEditingCargo(null);
         setEditedCargo({ iD_CARGO: '', nombrE_CARGO: '', descripcion: '' });
     };
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setEditedCargo({
@@ -124,19 +121,28 @@ function ONBConf() {
 
         axios.post(`${config.API_URL}/packs/bulk`, packsToSave)
             .then(response => {
-                console.log('Tareas guardadas correctamente');
                 handleCloseTasks();
+                setToastMessage('Las tareas se han guardado correctamente.');
+                setShowToast(true);
             })
             .catch(error => {
-                console.error('Error al guardar las tareas:', error);
                 setError('Error al guardar las tareas');
             });
     };
 
     const handleCloseTasks = () => {
         setTaskCargo(null);
-        setTaskError(null); // Restablecer el error al cerrar el modal
+        setTaskError(null);
     };
+
+    useEffect(() => {
+        if (showToast) {
+            const timer = setTimeout(() => {
+                setShowToast(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showToast]);
 
     if (loading) {
         return <div className="container">Cargando...</div>;
@@ -261,6 +267,19 @@ function ONBConf() {
                         </div>
                     </div>
                 </>
+            )}
+
+            {showToast && (
+                <div className="toast-container position-fixed bottom-0 end-0 p-3" style={{ zIndex: 11 }}>
+                    <div className="toast show align-items-center text-white bg-success border-0">
+                        <div className="d-flex">
+                            <div className="toast-body">
+                                {toastMessage}
+                            </div>
+                            <button type="button" className="btn-close btn-close-white me-2 m-auto" onClick={() => setShowToast(false)}></button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

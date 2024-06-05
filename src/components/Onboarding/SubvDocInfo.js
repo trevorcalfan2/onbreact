@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
-function SubvDocInfo({ formData, setFormData }) {
+const SubvDocInfo = forwardRef(({ formData, setFormData }, ref) => {
     const getCurrentDate = () => {
         const currentDate = new Date();
         const day = ('0' + currentDate.getDate()).slice(-2);
@@ -22,12 +22,13 @@ function SubvDocInfo({ formData, setFormData }) {
     };
 
     const containerStyle = {
-        width: '210mm',
+        width: '211mm',
         minHeight: '297mm',
-        padding: '20mm',
+        padding: '15mm', // Reduced padding
         border: '1px solid #000',
         margin: '0 auto',
-        backgroundColor: '#fff'
+        backgroundColor: '#fff',
+        boxSizing: 'border-box' // Ensures padding is included in the width/height
     };
 
     const handleCheckboxChange = (e) => {
@@ -38,7 +39,7 @@ function SubvDocInfo({ formData, setFormData }) {
     };
 
     return (
-        <div>
+        <div ref={ref}>
             <br />
             <div style={containerStyle}>
                 <h2 style={{ textAlign: 'center', textDecoration: 'underline' }}>PAGO DE SUBVENCIONES</h2>
@@ -110,6 +111,6 @@ function SubvDocInfo({ formData, setFormData }) {
             <br />
         </div>
     );
-}
+});
 
 export default SubvDocInfo;

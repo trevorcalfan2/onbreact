@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
-function NoAntInfo({ formData, setFormData }) {
+const NoAntInfo = forwardRef(({ formData, setFormData }, ref) => {
     const getCurrentDate = () => {
         const currentDate = new Date();
         const day = ('0' + currentDate.getDate()).slice(-2);
@@ -10,7 +10,7 @@ function NoAntInfo({ formData, setFormData }) {
             'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
         ];
         const month = months[currentDate.getMonth()];
-        return `${day} días del mes de ${month} de ${year}`;
+        return `${day} de ${month} de ${year}`;
     };
 
     const currentDate = getCurrentDate();
@@ -22,12 +22,13 @@ function NoAntInfo({ formData, setFormData }) {
     };
 
     const containerStyle = {
-        width: '210mm',
+        width: '211mm',
         minHeight: '297mm',
-        padding: '20mm',
+        padding: '15mm', // Reduced padding
         border: '1px solid #000',
         margin: '0 auto',
-        backgroundColor: '#fff'
+        backgroundColor: '#fff',
+        boxSizing: 'border-box' // Ensures padding is included in the width/height
     };
 
     const handleCheckboxChange = (e) => {
@@ -38,7 +39,7 @@ function NoAntInfo({ formData, setFormData }) {
     };
 
     return (
-        <div>
+        <div ref={ref}>
             <br/>
             <div style={containerStyle}>
                 <h2 style={{ textAlign: 'center', textDecoration: 'underline' }}>DECLARACIÓN JURADA DE NO TENER ANTECEDENTES POLICIALES NI JUDICIALES</h2>
@@ -80,6 +81,6 @@ function NoAntInfo({ formData, setFormData }) {
             <br/>
         </div>
     );
-}
+});
 
 export default NoAntInfo;

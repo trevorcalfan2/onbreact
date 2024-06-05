@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import WInfo from "./WInfo";
 import IntroInfo from "./IntroInfo";
 import PersonalInfo from "./PersonalInfo";
@@ -13,12 +13,22 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import axios from 'axios';
 import config from '../../config';
 import Cookies from 'universal-cookie';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 function Form() {
   const cookies = new Cookies();
+  const formRefs = {
+    "Acuerdo de Confidencialidad SGSI": useRef(null),
+    "Proceso Disciplinario SGSI": useRef(null),
+    "Declaración Jurada de No Tener Antecedentes Penales ni Judiciales SGSI": useRef(null),
+    "Pago de Subvenciones RRHH": useRef(null)
+  };
   const [page, setPage] = useState(0);
   const [isFormComplete, setIsFormComplete] = useState(false);
   const [activeTasks, setActiveTasks] = useState([]);
+  const [formCompleted, setFormCompleted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -43,6 +53,7 @@ function Form() {
     agreeNoAnt: false,
     agreeSubv: false
   });
+  const [capturedImages, setCapturedImages] = useState({});
 
   useEffect(() => {
     const fetchActiveTasks = async () => {
@@ -58,11 +69,18 @@ function Form() {
       }
     };
     fetchActiveTasks();
+
+    const checkIfFormCompleted = () => {
+      const formStatus = cookies.get('onB_ESTADO');
+      if (formStatus === 'false') {
+        setFormCompleted(true);
+      }
+    };
+    checkIfFormCompleted();
   }, [cookies]);
 
   useEffect(() => {
     const checkFormCompletion = () => {
-     
       switch (activeFormTitles[page]) {
         case "Bienvenida":
         case "Introducción":
@@ -92,7 +110,6 @@ function Form() {
     };
     const isComplete = checkFormCompletion();
     setIsFormComplete(isComplete);
-    console.log("isFormComplete:", isComplete);
   }, [formData, page, activeTasks]);
 
   const FormTitles = [
@@ -119,34 +136,103 @@ function Form() {
   };
 
   const activeFormTitles = getActiveFormTitles();
+  const captureAndUploadPDFs = async (final = false) => {
+    const userId = cookies.get('useR_ID');
+    let imagesToCapture = { ...capturedImages };
 
-  const handleNextPage = async () => {
-    if (page === activeFormTitles.length - 1) {
-      alert("FORM SUBMITTED");
-      console.log(formData);
-  
-      // Update the ONB_ESTADO to false
-      const userId = cookies.get('useR_ID');
-      try {
-        await axios.patch(`${config.API_URL}/usuarios/UpdateOnbEstado/${userId}`, { onB_ESTADO: false }, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-  
-        // Update the cookie to reflect the change
-        cookies.set('onB_ESTADO', false, { path: '/' });
-        
-        // Reload the form to reflect the completion status
-        window.location.reload();
-      } catch (error) {
-        console.error('Error updating user status:', error);
-      }
-    } else {
-      setPage(page + 1);
+    if (final && formRefs[activeFormTitles[page]] && formRefs[activeFormTitles[page]].current) {
+        // Asegurándonos de que el elemento formElement es válido
+        const formElement = formRefs[activeFormTitles[page]].current.querySelector('div[style*="padding: 15mm"]');
+
+        if (formElement) {
+            const canvas = await html2canvas(formElement, {
+                scale: 2,
+                useCORS: true,
+                logging: true,
+                scrollY: -window.scrollY
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            imagesToCapture = { ...imagesToCapture, [activeFormTitles[page]]: imgData };
+        } else {
+            console.error('No se pudo encontrar el elemento para capturar.');
+        }
     }
-  };
-  
+
+    for (const [title, imgData] of Object.entries(imagesToCapture)) {
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        const pdfBlob = pdf.output('blob');
+        const formData = new FormData();
+        formData.append('file', pdfBlob, `${userId}-${title}.pdf`);
+        formData.append('userId', userId);
+        formData.append('documentName', title);
+
+        try {
+            await axios.post(`${config.API_URL}/FileManagement/upload`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+        } catch (error) {
+            console.error('Error uploading PDF:', error);
+        }
+    }
+};
+
+const handleNextPage = async () => {
+    if (formRefs[activeFormTitles[page]] && formRefs[activeFormTitles[page]].current) {
+        // Asegurándonos de que el elemento formElement es válido
+        const formElement = formRefs[activeFormTitles[page]].current.querySelector('div[style*="padding: 15mm"]');
+
+        if (formElement) {
+            const canvas = await html2canvas(formElement, {
+                scale: 2,
+                useCORS: true,
+                logging: true,
+                scrollY: -window.scrollY
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            setCapturedImages(prevImages => ({
+                ...prevImages,
+                [activeFormTitles[page]]: imgData
+            }));
+        } else {
+            console.error('No se pudo encontrar el elemento para capturar.');
+        }
+    }
+
+    if (page === activeFormTitles.length - 1) {
+        setLoading(true);
+        try {
+            await captureAndUploadPDFs(true);
+
+            const userId = cookies.get('useR_ID');
+            await axios.patch(`${config.API_URL}/usuarios/UpdateOnbEstado/${userId}`, { onB_ESTADO: true }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            cookies.set('onB_ESTADO', 'true', { path: '/' });
+
+            alert("Formulario enviado exitosamente");
+            window.location.reload();
+        } catch (error) {
+            console.error('Error al enviar el formulario:', error);
+            alert("Ocurrió un error al enviar el formulario");
+        } finally {
+            setLoading(false);
+        }
+    } else {
+        setPage(page + 1);
+    }
+};
+
+
 
   const handlePreviousPage = () => {
     if (page > 0) {
@@ -154,8 +240,8 @@ function Form() {
     }
   };
 
-  const PageDisplay = () => {
-    switch (activeFormTitles[page]) {
+  const PageDisplay = (title = activeFormTitles[page]) => {
+    switch (title) {
       case "Bienvenida":
         return <WInfo formData={formData} setFormData={setFormData} />;
       case "Introducción":
@@ -163,15 +249,15 @@ function Form() {
       case "Información Personal":
         return <PersonalInfo formData={formData} setFormData={setFormData} />;
       case "Acuerdo de Confidencialidad SGSI":
-        return <ConfInfo formData={formData} setFormData={setFormData} />;
+        return <ConfInfo formData={formData} setFormData={setFormData} ref={formRefs[title]} />;
       case "Proceso Disciplinario SGSI":
-        return <DisInfo formData={formData} setFormData={setFormData} />;
+        return <DisInfo formData={formData} setFormData={setFormData} ref={formRefs[title]} />;
       case "Declaración Jurada de No Tener Antecedentes Penales ni Judiciales SGSI":
-        return <NoAntInfo formData={formData} setFormData={setFormData} />;
-      case "Pago de Subvenciones":
-        return <SubvInfo formData={formData} setFormData={setFormData} />;
+        return <NoAntInfo formData={formData} setFormData={setFormData} ref={formRefs[title]} />;
+        case "Pago de Subvenciones":
+          return <SubvInfo formData={formData} setFormData={setFormData} ref={formRefs[title]} />;
       case "Pago de Subvenciones RRHH":
-        return <SubvDocInfo formData={formData} setFormData={setFormData} />;
+        return <SubvDocInfo formData={formData} setFormData={setFormData} ref={formRefs[title]} />;
       default:
         return null;
     }
@@ -182,8 +268,30 @@ function Form() {
     return `${progressStep * page}%`;
   };
 
+  if (formCompleted) {
+    return (
+      <div className="form">
+        <div className="container-lg">
+          <div className="header">
+            <h1>Formularios Completados</h1>
+          </div>
+          <div className="body">
+            <p>Ya has completado todos los formularios requeridos.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="form">
+      {loading && (
+        <div className="loading-overlay">
+          <div className="spinner-border text-primary" role="status">
+            <span className="sr-only">Cargando...</span>
+          </div>
+        </div>
+      )}
       <div className="progressbar">
         <div
           style={{
@@ -201,7 +309,7 @@ function Form() {
         <div className="body">
           <TransitionGroup component={null}>
             <CSSTransition key={page} timeout={300} classNames="fade">
-              <div>{PageDisplay()}</div>
+              <div ref={formRefs[activeFormTitles[page]]}>{PageDisplay()}</div>
             </CSSTransition>
           </TransitionGroup>
         </div>

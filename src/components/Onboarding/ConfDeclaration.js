@@ -1,7 +1,7 @@
 import React from 'react';
 import Cookies from 'universal-cookie';
 
-function ConfDeclaration({ formData, setFormData }) {
+function ConfDeclaration({ formData, setFormData, innerRef }) {
     const getCurrentDate = () => {
         const currentDate = new Date();
         const day = ('0' + currentDate.getDate()).slice(-2);
@@ -43,12 +43,13 @@ function ConfDeclaration({ formData, setFormData }) {
     };
 
     const containerStyle = {
-        width: '210mm',
+        width: '211mm',
         minHeight: '297mm',
-        padding: '20mm',
+        padding: '15mm', // Reduced padding
         border: '1px solid #000',
         margin: '0 auto',
-        backgroundColor: '#fff'
+        backgroundColor: '#fff',
+        boxSizing: 'border-box' // Ensures padding is included in the width/height
     };
 
     const handleCheckboxChange = (e) => {
@@ -59,9 +60,8 @@ function ConfDeclaration({ formData, setFormData }) {
     };
 
     return (
-        <div>
-            <br/>
-            <div style={containerStyle}>
+        <div ref={innerRef}>
+            <div className="form-content" style={containerStyle}>
                 <h2 style={{ textAlign: 'center', textDecoration: 'underline' }}>DECLARACIÓN JURADA</h2>
                 <p style={textStyle}>
                     Por el presente documento, yo <strong>{formData.nombre} {formData.apellido}</strong> identificado con DNI N° <strong>{formData.dni}</strong> con la posición de <strong>{cargo}</strong> en ANGKOR GROUP S.A.C. con RUC 20506002975, declaro bajo juramento que tengo conocimiento de la confidencialidad con la que debe ser tratada la Información a la cual tendré acceso en la ejecución de mis funciones, comprometiéndome a mantener y guardar estricta reserva, absoluta confidencialidad y a no divulgar:
@@ -87,8 +87,9 @@ function ConfDeclaration({ formData, setFormData }) {
                     <p style={textStyle}>DNI: <strong>{formData.dni}</strong></p>
                     <p style={textStyle}>Surco, <strong>{currentDate}</strong></p>
                 </div>
-            </div> <br/>
-            <div className="form-check mt-3" >
+            </div>
+            <br />
+            <div className="form-check mt-3">
                 <input 
                     className="form-check-input" 
                     type="checkbox" 
@@ -100,7 +101,7 @@ function ConfDeclaration({ formData, setFormData }) {
                     Estoy de acuerdo con lo mencionado en este documento
                 </label>
             </div>
-            <br/>
+            <br />
         </div>
     );
 }

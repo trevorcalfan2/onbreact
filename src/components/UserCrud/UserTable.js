@@ -5,12 +5,20 @@ import axios from 'axios';
 import config from '../../config';
 import '../../css/Index.css';
 import CryptoJS from 'crypto-js';
+import { Worker, Viewer } from '@react-pdf-viewer/core';
+import '@react-pdf-viewer/core/lib/styles/index.css';
+import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
+import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 
 function UserTable({ setView }) {
     const [users, setUsers] = useState([]);
     const [editingUser, setEditingUser] = useState(null);
     const [viewingUser, setViewingUser] = useState(null);
     const [deleteUser, setDeleteUser] = useState(null);
+    const [userDocuments, setUserDocuments] = useState([]);
+    const [selectedDocument, setSelectedDocument] = useState(null);
+    const [documentToDelete, setDocumentToDelete] = useState(null); // Estado para el documento a eliminar
+    const defaultLayoutPluginInstance = defaultLayoutPlugin();
     const [editedUser, setEditedUser] = useState({
         USER_ID: '',
         NOMBRE: '',
@@ -18,9 +26,10 @@ function UserTable({ setView }) {
         EMAIL: '',
         ID_CARGO: '',
         ESTADO: '',
+        ONB_ESTADO: '', // Añadir ONB_ESTADO al estado del usuario editado
         PASSWORD: '',
-        ORIGINAL_PASSWORD: '', // Para mantener la contraseña original
-        REG_DATE: '', // Añadir REG_DATE al estado del usuario editado
+        ORIGINAL_PASSWORD: '',
+        REG_DATE: '',
         UP_DATE: ''
     });
 
@@ -54,10 +63,11 @@ function UserTable({ setView }) {
                         email: user.email,
                         cargoname: cargo,
                         estado: user.estado,
+                        onb_estado: user.onB_ESTADO, // Añadir ONB_ESTADO al usuario
                         password: user.password,
                         log: user.llog,
                         reg_date: user.reG_DATE,
-                        up_date: user.uP_DATE, // Incluir UP_DATE en los datos del usuario
+                        up_date: user.uP_DATE,
                         progress: 75
                     };
                 });
@@ -65,6 +75,16 @@ function UserTable({ setView }) {
             })
             .catch(error => {
                 console.error('Error al obtener los usuarios:', error);
+            });
+    };
+
+    const fetchUserDocuments = (userId) => {
+        axios.get(`${config.API_URL}/FileManagement/documents/${userId}`)
+            .then(response => {
+                setUserDocuments(response.data);
+            })
+            .catch(error => {
+                console.error('Error al obtener los documentos del usuario:', error);
             });
     };
 
@@ -77,15 +97,17 @@ function UserTable({ setView }) {
             EMAIL: user.email,
             ID_CARGO: user.cargo,
             ESTADO: user.estado,
-            PASSWORD: '', // Vaciar la contraseña para detectar si se actualiza
-            ORIGINAL_PASSWORD: user.password, // Mantener la contraseña original
-            REG_DATE: user.reg_date, // Mantener REG_DATE sin cambios
-            UP_DATE: user.up_date // Mantener UP_DATE sin cambios
+            ONB_ESTADO: user.onb_estado, // Nuevo campo
+            PASSWORD: '',
+            ORIGINAL_PASSWORD: user.password,
+            REG_DATE: user.reg_date,
+            UP_DATE: user.up_date
         });
     };
 
     const handleView = (user) => {
         setViewingUser(user);
+        fetchUserDocuments(user.id);
     };
 
     const handleDeleteClick = (user) => {
@@ -107,6 +129,25 @@ function UserTable({ setView }) {
         setDeleteUser(null);
     };
 
+    const handleDocumentDelete = (userId, documentName) => {
+        setDocumentToDelete({ userId, documentName });
+    };
+
+    const handleConfirmDocumentDelete = () => {
+        axios.delete(`${config.API_URL}/FileManagement/delete/${documentToDelete.userId}/${documentToDelete.documentName}`)
+            .then(response => {
+                fetchUserDocuments(documentToDelete.userId);
+                setDocumentToDelete(null);
+            })
+            .catch(error => {
+                console.error('Error al eliminar el documento:', error);
+            });
+    };
+
+    const handleCancelDocumentDelete = () => {
+        setDocumentToDelete(null);
+    };
+
     useEffect(() => {
         fetchUsers();
     }, []);
@@ -115,17 +156,17 @@ function UserTable({ setView }) {
         let updatedUser = {
             ...editedUser,
             ID_CARGO: parseInt(editedUser.ID_CARGO),
-            UP_DATE: new Date().toISOString(), // Agregar la fecha de actualización
+            UP_DATE: new Date().toISOString(),
             PASSWORD: editedUser.PASSWORD ? CryptoJS.MD5(editedUser.PASSWORD).toString() : editedUser.ORIGINAL_PASSWORD,
-            LLOG: users.find(user => user.id === editingUser).log, // Mantener el valor de LLOG
-            REG_DATE: editedUser.REG_DATE // Mantener el valor de REG_DATE sin cambios
+            LLOG: users.find(user => user.id === editingUser).log,
+            REG_DATE: editedUser.REG_DATE
         };
 
         axios.put(`${config.API_URL}/usuarios/${editingUser}`, updatedUser)
             .then(response => {
                 fetchUsers();
                 setEditingUser(null);
-                setEditedUser({ USER_ID: '', NOMBRE: '', APELLIDO: '', EMAIL: '', ID_CARGO: '', ESTADO: '', PASSWORD: '', ORIGINAL_PASSWORD: '', REG_DATE: '', UP_DATE: '' });
+                setEditedUser({ USER_ID: '', NOMBRE: '', APELLIDO: '', EMAIL: '', ID_CARGO: '', ESTADO: '', ONB_ESTADO: '', PASSWORD: '', ORIGINAL_PASSWORD: '', REG_DATE: '', UP_DATE: '' });
             })
             .catch(error => {
                 console.error('Error al actualizar el usuario:', error);
@@ -138,6 +179,14 @@ function UserTable({ setView }) {
             ...editedUser,
             [name.toUpperCase()]: type === 'checkbox' ? (checked ? 'true' : 'false') : value
         });
+    };
+
+    const handleDocumentView = (userId, documentName) => {
+        setSelectedDocument({ userId, documentName });
+    };
+
+    const handleCloseDocumentView = () => {
+        setSelectedDocument(null);
     };
 
     return (
@@ -156,8 +205,8 @@ function UserTable({ setView }) {
                         <th>Email</th>
                         <th>Cargo</th>
                         <th>Estado</th>
-                        <th>Último Log</th>
-                        <th>Documentos</th>
+                        <th>Onboarding</th>
+                       {/* <th>Último Log</th>*/}
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -170,12 +219,8 @@ function UserTable({ setView }) {
                             <td>{user.email}</td>
                             <td>{user.cargoname}</td>
                             <td>{user.estado === 'true' ? 'Activo' : 'Inactivo'}</td>
-                            <td>{user.log}</td>
-                            <td>
-                                <div className="progress">
-                                    <div className="progress-bar" role="progressbar" style={{ width: `${user.progress}%` }} aria-valuenow={user.progress} aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </td>
+                            <td>{user.onb_estado === 'true' ? 'En  Proceso' : 'Completado'}</td> {/* Mostrar estado de ONB_ESTADO */}
+                          {/*  <td>{user.log}</td>*/}
                             <td>
                                 <button className="btn btn-info btn-sm me-1" onClick={() => handleView(user)}>
                                     <i className="fas fa-eye"></i>
@@ -210,10 +255,20 @@ function UserTable({ setView }) {
                                     <p><strong>Email:</strong> {viewingUser.email}</p>
                                     <p><strong>Cargo:</strong> {viewingUser.cargoname}</p>
                                     <p><strong>Estado:</strong> {viewingUser.estado === 'true' ? 'Activo' : 'Inactivo'}</p>
+                                    <p><strong>Onboarding:</strong> {viewingUser.onb_estado === 'true' ? 'En  Proceso' : 'Completado'}</p> {/* Mostrar estado de ONB_ESTADO */}
                                     <p><strong>Último Log:</strong> {viewingUser.log}</p>
-                                    <p><strong>Fecha de Registro:</strong> {viewingUser.reg_date}</p> {/* Mostrar REG_DATE */}
-                                    <p><strong>Última Actualización:</strong> {viewingUser.up_date}</p> {/* Mostrar UP_DATE */}
-                                    <p><strong>Documentos:</strong> {/* Aquí puedes agregar la lógica para mostrar los documentos */}</p>
+                                    <p><strong>Fecha de Registro:</strong> {viewingUser.reg_date}</p>
+                                    <p><strong>Última Actualización:</strong> {viewingUser.up_date}</p>
+                                    <p><strong>Documentos:</strong></p>
+                                    <ul>
+                                        {userDocuments.map((doc, index) => (
+                                            <li key={index}>
+                                                {doc}
+                                                <button className="btn btn-link" onClick={() => handleDocumentView(viewingUser.id, doc)}>Ver</button>
+                                                <button className="btn btn-link text-danger" onClick={() => handleDocumentDelete(viewingUser.id, doc)}>Eliminar</button>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" onClick={() => setViewingUser(null)}>Cerrar</button>
@@ -295,6 +350,19 @@ function UserTable({ setView }) {
                                             </select>
                                         </div>
                                         <div className="form-group">
+                                            <label>Estado Onboarding:</label>
+                                            <select
+                                                className="form-control"
+                                                name="ONB_ESTADO"
+                                                value={editedUser.ONB_ESTADO}
+                                                onChange={handleInputChange}
+                                            >
+                                                <option value="true">En  Proceso</option>
+                                                <option value="false">Completado</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="form-group">
                                             <label>Contraseña:</label>
                                             <input
                                                 type="password"
@@ -334,6 +402,67 @@ function UserTable({ setView }) {
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" onClick={handleDeleteCancel}>Cancelar</button>
                                     <button type="button" className="btn btn-danger" onClick={handleDeleteConfirm}>Eliminar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {documentToDelete && (
+                <>
+                    <div className="modal-overlay show"></div>
+                    <div className="modal" style={{ display: 'block' }}>
+                        <div className="modal-dialog">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Confirmar Eliminación de Documento</h5>
+                                    <button type="button" className="close" onClick={handleCancelDocumentDelete}>
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    <p>¿Estás seguro de que deseas eliminar el documento {documentToDelete.documentName}?</p>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={handleCancelDocumentDelete}>Cancelar</button>
+                                    <button type="button" className="btn btn-danger" onClick={handleConfirmDocumentDelete}>Eliminar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {selectedDocument && (
+                <>
+                    <div className="modal-overlay show"></div>
+                    <div className="modal" style={{ display: 'block' }}>
+                        <div className="modal-dialog modal-xl">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Vista previa del documento</h5>
+                                    <button type="button" className="close" onClick={handleCloseDocumentView}>
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                                <div className="modal-body">
+                                    <Worker workerUrl={`https://unpkg.com/pdfjs-dist@2.6.347/build/pdf.worker.min.js`}>
+                                        <Viewer
+                                            fileUrl={`${config.API_URL}/FileManagement/download/${selectedDocument.userId}/${selectedDocument.documentName}`}
+                                            plugins={[defaultLayoutPluginInstance]}
+                                        />
+                                    </Worker>
+                                </div>
+                                <div className="modal-footer">
+                                    <a
+                                        href={`${config.API_URL}/FileManagement/download/${selectedDocument.userId}/${selectedDocument.documentName}`}
+                                        download
+                                        className="btn btn-primary"
+                                    >
+                                        Descargar
+                                    </a>
+                                    <button type="button" className="btn btn-secondary" onClick={handleCloseDocumentView}>Cerrar</button>
                                 </div>
                             </div>
                         </div>
