@@ -54,6 +54,7 @@ function Form() {
     agreeSubv: false
   });
   const [capturedImages, setCapturedImages] = useState({});
+  const [alertVisible, setAlertVisible] = useState(false);
 
   useEffect(() => {
     const fetchActiveTasks = async () => {
@@ -212,15 +213,18 @@ const handleNextPage = async () => {
             await captureAndUploadPDFs(true);
 
             const userId = cookies.get('useR_ID');
-            await axios.patch(`${config.API_URL}/usuarios/UpdateOnbEstado/${userId}`, { onB_ESTADO: true }, {
+            await axios.patch(`${config.API_URL}/usuarios/UpdateOnbEstado/${userId}`, { onB_ESTADO: false }, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
-            cookies.set('onB_ESTADO', 'true', { path: '/' });
+            cookies.set('onB_ESTADO', 'false', { path: '/' });
 
-            alert("Formulario enviado exitosamente");
-            window.location.reload();
+            setAlertVisible(true);
+            setTimeout(() => {
+              setAlertVisible(false);
+              window.location.reload();
+            }, 3000);
         } catch (error) {
             console.error('Error al enviar el formulario:', error);
             alert("Ocurrió un error al enviar el formulario");
@@ -232,9 +236,7 @@ const handleNextPage = async () => {
     }
 };
 
-
-
-  const handlePreviousPage = () => {
+const handlePreviousPage = () => {
     if (page > 0) {
       setPage(page - 1);
     }
@@ -290,6 +292,11 @@ const handleNextPage = async () => {
           <div className="spinner-border text-primary" role="status">
             <span className="sr-only">Cargando...</span>
           </div>
+        </div>
+      )}
+      {alertVisible && (
+        <div className="alert alert-success position-fixed bottom-0 end-0 m-3" role="alert">
+          Formulario enviado exitosamente
         </div>
       )}
       <div className="progressbar">

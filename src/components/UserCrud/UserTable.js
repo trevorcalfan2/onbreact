@@ -64,6 +64,7 @@ function UserTable({ setView }) {
                         cargoname: cargo,
                         estado: user.estado,
                         onb_estado: user.onB_ESTADO, // Añadir ONB_ESTADO al usuario
+                        fechaicontrato:user.fechaicontrato,
                         password: user.password,
                         log: user.llog,
                         reg_date: user.reG_DATE,
@@ -254,6 +255,7 @@ function UserTable({ setView }) {
                                     <p><strong>Apellido:</strong> {viewingUser.apellido}</p>
                                     <p><strong>Email:</strong> {viewingUser.email}</p>
                                     <p><strong>Cargo:</strong> {viewingUser.cargoname}</p>
+                                    <p><strong>Fecha Inicio de Contrato:</strong> {viewingUser.fechaicontrato}</p>
                                     <p><strong>Estado:</strong> {viewingUser.estado === 'true' ? 'Activo' : 'Inactivo'}</p>
                                     <p><strong>Onboarding:</strong> {viewingUser.onb_estado === 'true' ? 'En  Proceso' : 'Completado'}</p> {/* Mostrar estado de ONB_ESTADO */}
                                     <p><strong>Último Log:</strong> {viewingUser.log}</p>

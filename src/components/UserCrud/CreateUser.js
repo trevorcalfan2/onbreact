@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CryptoJS from 'crypto-js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import config from '../../config';
@@ -10,13 +10,16 @@ function CreateUser({ setView }) {
         apellido: '',
         email: '',
         fechaiContrato: '',
-        estado: 'Activo', // Default value
+        estado: 'Activo',
         password: '',
         idCargo: 1
     });
 
     const [showModal, setShowModal] = useState(false);
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
 
     const handleChange = e => {
         const { name, value } = e.target;
@@ -48,34 +51,32 @@ function CreateUser({ setView }) {
 
     const handleCloseModal = () => setShowModal(false);
 
+    const formatLocalDateTime = (date) => {
+        const pad = (num) => (num < 10 ? '0' + num : num);
+        const year = date.getFullYear();
+        const month = pad(date.getMonth() + 1);
+        const day = pad(date.getDate());
+        return `${year}-${month}-${day}`;
+    };
+
     const handleConfirmSubmit = async () => {
         handleCloseModal();
-    
-        const formatLocalDateTime = () => {
-            const date = new Date();
-            const pad = (num) => (num < 10 ? '0' + num : num);
-            const year = date.getFullYear();
-            const month = pad(date.getMonth() + 1);
-            const day = pad(date.getDate());
-            const hours = pad(date.getHours());
-            const minutes = pad(date.getMinutes());
-            const seconds = pad(date.getSeconds());
-            return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-        };
-    
+        setLoading(true);
+
         const usuario = {
             NOMBRE: form.nombre,
             APELLIDO: form.apellido,
             EMAIL: form.email,
-            FECHAICONTRATO: form.fechaiContrato,
+            FECHAICONTRATO: `${form.fechaiContrato}T00:00:00`, // Ajustar la fecha al formato esperado
             ESTADO: form.estado === 'Activo' ? 'true' : 'false',
             PASSWORD: CryptoJS.MD5(form.password).toString(),
             ID_CARGO: form.idCargo,
-            REG_DATE: formatLocalDateTime(),
+            ONB_ESTADO: "true",
+            REG_DATE: formatLocalDateTime(new Date()),
             UP_DATE: null,
             LLOG: null
         };
-    
+
         try {
             const response = await fetch(`${config.API_URL}/usuarios`, {
                 method: 'POST',
@@ -86,16 +87,59 @@ function CreateUser({ setView }) {
             });
             if (response.ok) {
                 console.log('Usuario creado con éxito');
+                await sendWelcomeEmail(form);
                 setView('user');
+                setToastMessage('Usuario creado con éxito');
+                setShowToast(true);
             } else {
                 const errorData = await response.json();
                 console.error('Error al crear el usuario', errorData);
+                setToastMessage('Error al crear el usuario');
+                setShowToast(true);
             }
         } catch (error) {
             console.error('Error de conexión', error);
+            setToastMessage('Error de conexión');
+            setShowToast(true);
+        } finally {
+            setLoading(false);
         }
     };
-    
+
+    const sendWelcomeEmail = async (user) => {
+        try {
+            const response = await fetch(`${config.API_URL}/Email/send-welcome-email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(user)
+            });
+
+            if (response.ok) {
+                console.log('Email de bienvenida enviado con éxito');
+                setToastMessage('Email de bienvenida enviado con éxito');
+                setShowToast(true);
+            } else {
+                console.error('Error al enviar el email de bienvenida');
+                setToastMessage('Error al enviar el email de bienvenida');
+                setShowToast(true);
+            }
+        } catch (error) {
+            console.error('Error de conexión al enviar el email', error);
+            setToastMessage('Error de conexión al enviar el email');
+            setShowToast(true);
+        }
+    };
+
+    useEffect(() => {
+        if (showToast) {
+            const timer = setTimeout(() => {
+                setShowToast(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showToast]);
 
     const handleSubmit = e => {
         e.preventDefault();
@@ -104,6 +148,13 @@ function CreateUser({ setView }) {
 
     return (
         <div className="container">
+            {loading && (
+                <div className="loading-overlay">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="sr-only">Cargando...</span>
+                    </div>
+                </div>
+            )}
             <h2>Crear Usuario</h2><br/>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
@@ -228,6 +279,20 @@ function CreateUser({ setView }) {
                                 <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancelar</button>
                                 <button type="button" className="btn btn-primary" onClick={handleConfirmSubmit}>Confirmar</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Toast de notificación */}
+            {showToast && (
+                <div className="toast-container position-fixed bottom-0 end-0 p-3" style={{ zIndex: 11 }}>
+                    <div className="toast show align-items-center text-white bg-success border-0">
+                        <div className="d-flex">
+                            <div className="toast-body">
+                                {toastMessage}
+                            </div>
+                            <button type="button" className="btn-close btn-close-white me-2 m-auto" onClick={() => setShowToast(false)}></button>
                         </div>
                     </div>
                 </div>
