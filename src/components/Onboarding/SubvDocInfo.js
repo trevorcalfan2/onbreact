@@ -74,14 +74,11 @@ const SubvDocInfo = forwardRef(({ formData, setFormData }, ref) => {
                         </tbody>
                     </table>
                 </div>
+                <br />
                 <p style={textStyle}>
                     Fecha: {currentDate}
                     <br />
-                    Firma: <span style={{ display: 'inline-block', width: '200px', borderBottom: '1px solid #000' }}>
-                        {formData.firma && (
-                            <img src={formData.firma} alt="Firma" style={{ height: '50px' }} />
-                        )}
-                    </span>
+                   
                 </p>
                 <p style={textStyle}>
                     (*) Indicar nombre de la entidad financiera

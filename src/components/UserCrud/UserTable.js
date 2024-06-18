@@ -9,16 +9,25 @@ import { Worker, Viewer } from '@react-pdf-viewer/core';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+import { CSVLink } from 'react-csv';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 function UserTable({ setView }) {
     const [users, setUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
     const [editingUser, setEditingUser] = useState(null);
     const [viewingUser, setViewingUser] = useState(null);
     const [deleteUser, setDeleteUser] = useState(null);
     const [userDocuments, setUserDocuments] = useState([]);
     const [selectedDocument, setSelectedDocument] = useState(null);
     const [documentToDelete, setDocumentToDelete] = useState(null); // Estado para el documento a eliminar
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [currentPage, setCurrentPage] = useState(1);
     const defaultLayoutPluginInstance = defaultLayoutPlugin();
+
     const [editedUser, setEditedUser] = useState({
         USER_ID: '',
         NOMBRE: '',
@@ -32,6 +41,18 @@ function UserTable({ setView }) {
         REG_DATE: '',
         UP_DATE: ''
     });
+
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    useEffect(() => {
+        setFilteredUsers(users.filter(user =>
+            user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        ));
+    }, [searchTerm, users]);
 
     const fetchUsers = () => {
         axios.get(`${config.API_URL}/usuarios`)
@@ -64,7 +85,7 @@ function UserTable({ setView }) {
                         cargoname: cargo,
                         estado: user.estado,
                         onb_estado: user.onB_ESTADO, // Añadir ONB_ESTADO al usuario
-                        fechaicontrato:user.fechaicontrato,
+                        fechaicontrato: user.fechaicontrato,
                         password: user.password,
                         log: user.llog,
                         reg_date: user.reG_DATE,
@@ -116,14 +137,32 @@ function UserTable({ setView }) {
     };
 
     const handleDeleteConfirm = () => {
-        axios.delete(`${config.API_URL}/usuarios/${deleteUser.id}`)
-            .then(response => {
-                setUsers(users.filter(user => user.id !== deleteUser.id));
-                setDeleteUser(null);
-            })
-            .catch(error => {
-                console.error('Error al eliminar el usuario:', error);
-            });
+        if (Array.isArray(deleteUser)) {
+            // Eliminar múltiples usuarios
+            const deletePromises = deleteUser.map(id =>
+                axios.delete(`${config.API_URL}/usuarios/${id}`)
+            );
+
+            Promise.all(deletePromises)
+                .then(() => {
+                    setUsers(users.filter(user => !deleteUser.includes(user.id)));
+                    setDeleteUser(null);
+                    setSelectedRows([]);
+                })
+                .catch(error => {
+                    console.error('Error al eliminar los usuarios:', error);
+                });
+        } else {
+            // Eliminar un solo usuario
+            axios.delete(`${config.API_URL}/usuarios/${deleteUser.id}`)
+                .then(() => {
+                    setUsers(users.filter(user => user.id !== deleteUser.id));
+                    setDeleteUser(null);
+                })
+                .catch(error => {
+                    console.error('Error al eliminar el usuario:', error);
+                });
+        }
     };
 
     const handleDeleteCancel = () => {
@@ -148,10 +187,6 @@ function UserTable({ setView }) {
     const handleCancelDocumentDelete = () => {
         setDocumentToDelete(null);
     };
-
-    useEffect(() => {
-        fetchUsers();
-    }, []);
 
     const handleSaveEdit = () => {
         let updatedUser = {
@@ -190,16 +225,125 @@ function UserTable({ setView }) {
         setSelectedDocument(null);
     };
 
+    const handleRowSelect = (userId) => {
+        setSelectedRows(prevSelectedRows =>
+            prevSelectedRows.includes(userId)
+                ? prevSelectedRows.filter(id => id !== userId)
+                : [...prevSelectedRows, userId]
+        );
+    };
+
+    const handleExportCSV = () => {
+        const data = (selectedRows.length > 0 ? selectedRows : users.map(user => user.id)).map(id => {
+            const user = users.find(user => user.id === id);
+            return {
+                ID: user.id,
+                Nombre: user.nombre,
+                Apellido: user.apellido,
+                Email: user.email,
+                Cargo: user.cargoname,
+                Estado: user.estado === 'true' ? 'Activo' : 'Inactivo',
+                Onboarding: user.onb_estado === 'true' ? 'En  Proceso' : 'Completado',
+                FechaRegistro: user.reg_date,
+                UltimaActualizacion: user.up_date
+            };
+        });
+        return data;
+    };
+    
+    const handleExportPDF = () => {
+        const doc = new jsPDF();
+        const data = (selectedRows.length > 0 ? selectedRows : users.map(user => user.id)).map(id => {
+            const user = users.find(user => user.id === id);
+            return [
+                user.id,
+                user.nombre,
+                user.apellido,
+                user.email,
+                user.cargoname,
+                user.estado === 'true' ? 'Activo' : 'Inactivo',
+                user.onb_estado === 'true' ? 'En  Proceso' : 'Completado',
+                user.reg_date,
+                user.up_date
+            ];
+        });
+    
+        autoTable(doc, {
+            head: [['ID', 'Nombre', 'Apellido', 'Email', 'Cargo', 'Estado', 'Onboarding', 'Fecha Registro', 'Última Actualización']],
+            body: data
+        });
+    
+        doc.save('usuarios.pdf');
+    };
+    
+
+    const handleRowsPerPageChange = (e) => {
+        setRowsPerPage(parseInt(e.target.value));
+        setCurrentPage(1);
+    };
+
+    const paginatedUsers = filteredUsers.slice(
+        (currentPage - 1) * rowsPerPage,
+        currentPage * rowsPerPage
+    );
+
+    const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
+
     return (
         <div className="container">
-            <div className="d-flex justify-content-end mb-3">
+            <div className="d-flex justify-content-between mb-3">
                 <button className="btn btn-primary" onClick={() => setView('createUser')}>
                     <i className="fas fa-plus"></i> Crear Usuario
                 </button>
+                <div className="d-flex align-items-center">
+                    <input
+                        type="text"
+                        className="form-control me-2 mb-0"
+                        placeholder="Buscar..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <select className="form-select me-2" value={rowsPerPage} onChange={handleRowsPerPageChange}>
+                        <option value={10}>10 filas</option>
+                        <option value={30}>30 filas</option>
+                        <option value={50}>50 filas</option>
+                    </select>
+                    <button 
+                        className="btn btn-danger me-2" 
+                        onClick={() => setDeleteUser(selectedRows)}
+                        disabled={selectedRows.length === 0}
+                    >
+                        <i className="fas fa-trash"></i>
+                    </button>
+                    <CSVLink
+                        data={handleExportCSV()}
+                        className="btn btn-success me-2"
+                        filename="usuarios.csv"
+                    >
+                        <i className="fas fa-file-csv"></i>
+                    </CSVLink>
+                    <button className="btn btn-warning" onClick={handleExportPDF}>
+                        <i className="fas fa-file-pdf"></i>
+                    </button>
+                </div>
             </div>
+
             <table className="table table-striped">
                 <thead>
                     <tr>
+                        <th>
+                            <input
+                                type="checkbox"
+                                onChange={(e) => {
+                                    if (e.target.checked) {
+                                        setSelectedRows(filteredUsers.map(user => user.id));
+                                    } else {
+                                        setSelectedRows([]);
+                                    }
+                                }}
+                                checked={selectedRows.length === filteredUsers.length}
+                            />
+                        </th>
                         <th>ID</th>
                         <th>Nombre</th>
                         <th>Apellido</th>
@@ -207,13 +351,19 @@ function UserTable({ setView }) {
                         <th>Cargo</th>
                         <th>Estado</th>
                         <th>Onboarding</th>
-                       {/* <th>Último Log</th>*/}
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {users.map(user => (
+                    {paginatedUsers.map(user => (
                         <tr key={user.id}>
+                            <td>
+                                <input
+                                    type="checkbox"
+                                    checked={selectedRows.includes(user.id)}
+                                    onChange={() => handleRowSelect(user.id)}
+                                />
+                            </td>
                             <td>{user.id}</td>
                             <td>{user.nombre}</td>
                             <td>{user.apellido}</td>
@@ -221,7 +371,6 @@ function UserTable({ setView }) {
                             <td>{user.cargoname}</td>
                             <td>{user.estado === 'true' ? 'Activo' : 'Inactivo'}</td>
                             <td>{user.onb_estado === 'true' ? 'En  Proceso' : 'Completado'}</td> {/* Mostrar estado de ONB_ESTADO */}
-                          {/*  <td>{user.log}</td>*/}
                             <td>
                                 <button className="btn btn-info btn-sm me-1" onClick={() => handleView(user)}>
                                     <i className="fas fa-eye"></i>
@@ -229,7 +378,11 @@ function UserTable({ setView }) {
                                 <button className="btn btn-warning btn-sm me-1" onClick={() => handleEdit(user)}>
                                     <i className="fas fa-edit"></i>
                                 </button>
-                                <button className="btn btn-danger btn-sm" onClick={() => handleDeleteClick(user)}>
+                                <button 
+                                    className="btn btn-danger btn-sm" 
+                                    onClick={() => handleDeleteClick(user)}
+                                    disabled={selectedRows.includes(user.id)}
+                                >
                                     <i className="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -237,6 +390,24 @@ function UserTable({ setView }) {
                     ))}
                 </tbody>
             </table>
+
+            <div className="d-flex justify-content-between">
+                <button
+                    className="btn btn-secondary"
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                >
+                    Anterior
+                </button>
+                <span>Página {currentPage} de {totalPages}</span>
+                <button
+                    className="btn btn-secondary"
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                >
+                    Siguiente
+                </button>
+            </div>
 
             {viewingUser && (
                 <>

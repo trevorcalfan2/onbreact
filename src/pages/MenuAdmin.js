@@ -9,6 +9,7 @@ import User from '../components/UserCrud/User';
 import CreateUser from '../components/UserCrud/CreateUser';
 import Config from '../components/AdminView/Config';
 import Onboarding from '../components/AdminView/ONBConf';
+import Videos from '../components/AdminView/Videos';
 
 function MenuAdmin() {
     const cookies = new Cookies();
@@ -36,7 +37,7 @@ function MenuAdmin() {
         }
     }, [cookies, navigate]);
 
-    const [view, setView] = useState('dashboard');
+    const [view, setView] = useState('user');
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
 
@@ -77,8 +78,10 @@ function MenuAdmin() {
                 return <Config />; // Añadimos la vista de configuración aquí
             case 'onboarding':
                 return <Onboarding />;
+            case 'videos':
+                return <Videos />;
             default:
-                return <Dashboard />;
+                return <User />;
         }
     };
 
@@ -121,12 +124,14 @@ function MenuAdmin() {
                     </div>
 
                     <ul className="list-unstyled components">
+                        {/** 
                         <li>
                             <a href="#" onClick={() => handleButtonClick('dashboard')} className={view === 'dashboard' ? 'active' : ''}>
                                 <i className="fa-solid fa-chart-simple"></i>
                                 Dashboard
                             </a>
-                        </li>
+                        </li>**/
+}
                         <li>
                             <a href="#" onClick={() => handleButtonClick('user')} className={view === 'user' ? 'active' : ''}>
                                 <i className="fas fa-user"></i>
@@ -146,9 +151,9 @@ function MenuAdmin() {
                             </a>
                         </li>
                         <li>
-                            <a href="#">
-                                <i className="fas fa-paper-plane"></i>
-                                Contact
+                            <a href="#" onClick={() => handleButtonClick('videos')} className={view === 'videos' ? 'active' : ''}>
+                                <i className="fas fa-video"></i>
+                                Videos
                             </a>
                         </li>
                     </ul>

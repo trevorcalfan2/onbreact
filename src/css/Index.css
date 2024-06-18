@@ -38,5 +38,133 @@
       transform: rotate(360deg);
     }
   }
+  
+/* Index.css */
+.welcome-container {
+  justify-content: space-between;
+  align-items: center;
+  background-color: #04009a; /* Background color */
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #f0f0eb; /* Text color */
+}
 
- 
+.text-section {
+  width: 50%;
+  text-align: left;
+}
+
+.text-section h1 {
+  color: #f0f0eb; /* Heading color */
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.text-section p {
+  color: white; /* Paragraph text color */
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  line-height: 1.5;
+}
+
+.text-section .btn {
+  background-color: #3edbf0; /* Button background color */
+  color: #04009a; /* Button text color */
+  border: none;
+  margin-right: 10px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.text-section .btn-secondary {
+  background-color: #77acf1; /* Secondary button background color */
+}
+
+.video-section {
+  width: 50%;
+}
+
+.video-section iframe {
+  width: 100%;
+  height: 315px;
+  border: 5px solid #04009a; /* Video border color */
+  border-radius: 10px;
+}
+
+.container {
+  padding: 20px;
+}
+
+.custom-card-bg {
+  background-color: #04009A; /* Dark blue color from the palette */
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #f0f0eb; /* Light color text */
+}
+
+.custom-card-bg h2, .custom-card-bg p {
+  color: #f0f0eb; /* Light color text */
+}
+
+.custom-card {
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: #04009A; /* Dark blue background */
+  color: #f0f0eb; /* Light color text */
+  transition: transform 0.2s ease-in-out;
+}
+
+.custom-card:hover {
+  transform: translateY(-10px);
+}
+
+.custom-card-body {
+  padding: 20px;
+}
+
+.custom-card-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: white; /* Light blue color */
+}
+
+.custom-card-text {
+  font-size: 1rem;
+  color: #f0f0eb; /* Light color text */
+}
+
+.img-thumbnail {
+  border: none;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-control {
+  background-color: #f0f0eb;
+  border: 2px solid #77acf1;
+  border-radius: 5px;
+  color: #04009A;
+}
+
+.form-control-file {
+  color: #04009A;
+}
+
+.btn-light {
+  background-color: #77acf1;
+  border: none;
+  color: #04009A;
+}
+
+.btn-light:hover {
+  background-color: #3edbf0;
+}
+
+.form-group label {
+  color: rgb(32, 32, 32);
+}

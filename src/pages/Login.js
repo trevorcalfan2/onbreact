@@ -5,6 +5,7 @@ import Cookies from 'universal-cookie';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import '../css/Login.css';
+import logo from '../images/logo.jpg'; // Ajusta la ruta a tu logo
 import config from '../config';
 
 function Login(props) {
@@ -131,43 +132,44 @@ function Login(props) {
     }
 
     return (
-        <div className="d-flex align-items-center justify-content-center h-100">
-            <div className={`container text-center ${isAdminView ? 'admin-view' : ''}`}>
-                <div className="row justify-content-center">
-                    <div className="col-md-6">
-                        <h1 className={`mb-3 ${isAdminView ? 'text-white' : 'text-dark'}`}>
-                            {isAdminView ? 'Acceder como Administrador' : 'Acceder como Cliente'}
-                        </h1>
-                        <div className="mb-3">
-                            <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Ingresar email"
-                                name='email'
-                                onChange={handleChange} />
-                        </div>
-                        <div className="mb-3">
-                            <input
-                                type="password"
-                                className="form-control"
-                                placeholder="Ingresar contraseña"
-                                name='password'
-                                onChange={handleChange} />
-                        </div>
-                        <div className="d-grid mb-3">
-                            <button className="btn btn-primary btn-lg" onClick={iniciarSesion}>Iniciar Sesión</button>
-                        </div>
-                        <div className="d-grid">
-                            <span className="btn btn-link" onClick={cambiarVistaAdmin}>
-                                {isAdminView ? 'Cambiar a Cliente' : 'Cambiar a Administrador'}
-                            </span>
-                        </div>
-                        {alert.show && (
-                            <div className={`alert alert-${alert.variant} mt-3`} role="alert">
-                                {alert.message}
-                            </div>
-                        )}
+        <div className="auth-wrapper">
+            <div className="auth-container">
+                <div className="auth-left">
+                    <div className="mb-3">
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Ingresar email"
+                            name='email'
+                            onChange={handleChange} />
                     </div>
+                    <div className="mb-3">
+                        <input
+                            type="password"
+                            className="form-control"
+                            placeholder="Ingresar contraseña"
+                            name='password'
+                            onChange={handleChange} />
+                    </div>
+                    <div className="d-grid mb-3">
+                        <button className="btn btn-primary btn-lg" onClick={iniciarSesion}>Iniciar Sesión</button>
+                    </div>
+                    <div className="d-grid">
+                        <span className="btn btn-link" onClick={cambiarVistaAdmin}>
+                            {isAdminView ? 'Cambiar a Cliente' : 'Cambiar a Administrador'}
+                        </span>
+                    </div>
+                    {alert.show && (
+                        <div className={`alert alert-${alert.variant} mt-3`} role="alert">
+                            {alert.message}
+                        </div>
+                    )}
+                </div>
+                <div className="auth-right text-center">
+                    <h1 className="mb-3">BIENVENIDO AL PROCESO DE INDUCCIÓN</h1>
+                </div>
+                <div className="logo-container">
+                    <img src={logo} alt="Company Logo" style={{width:'60px'}} />
                 </div>
             </div>
         </div>

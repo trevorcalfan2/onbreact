@@ -137,106 +137,107 @@ function Form() {
   };
 
   const activeFormTitles = getActiveFormTitles();
+
   const captureAndUploadPDFs = async (final = false) => {
     const userId = cookies.get('useR_ID');
     let imagesToCapture = { ...capturedImages };
 
     if (final && formRefs[activeFormTitles[page]] && formRefs[activeFormTitles[page]].current) {
-        // Asegurándonos de que el elemento formElement es válido
-        const formElement = formRefs[activeFormTitles[page]].current.querySelector('div[style*="padding: 15mm"]');
+      // Asegurándonos de que el elemento formElement es válido
+      const formElement = formRefs[activeFormTitles[page]].current.querySelector('div[style*="padding: 15mm"]');
 
-        if (formElement) {
-            const canvas = await html2canvas(formElement, {
-                scale: 2,
-                useCORS: true,
-                logging: true,
-                scrollY: -window.scrollY
-            });
+      if (formElement) {
+        const canvas = await html2canvas(formElement, {
+          scale: 2,
+          useCORS: true,
+          logging: true,
+          scrollY: -window.scrollY
+        });
 
-            const imgData = canvas.toDataURL('image/png');
-            imagesToCapture = { ...imagesToCapture, [activeFormTitles[page]]: imgData };
-        } else {
-            console.error('No se pudo encontrar el elemento para capturar.');
-        }
+        const imgData = canvas.toDataURL('image/png');
+        imagesToCapture = { ...imagesToCapture, [activeFormTitles[page]]: imgData };
+      } else {
+        console.error('No se pudo encontrar el elemento para capturar.');
+      }
     }
 
     for (const [title, imgData] of Object.entries(imagesToCapture)) {
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        const pdfBlob = pdf.output('blob');
-        const formData = new FormData();
-        formData.append('file', pdfBlob, `${userId}-${title}.pdf`);
-        formData.append('userId', userId);
-        formData.append('documentName', title);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      const pdfBlob = pdf.output('blob');
+      const formData = new FormData();
+      formData.append('file', pdfBlob, `${userId}-${title}.pdf`);
+      formData.append('userId', userId);
+      formData.append('documentName', title);
 
-        try {
-            await axios.post(`${config.API_URL}/FileManagement/upload`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-        } catch (error) {
-            console.error('Error uploading PDF:', error);
-        }
+      try {
+        await axios.post(`${config.API_URL}/FileManagement/upload`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+      } catch (error) {
+        console.error('Error uploading PDF:', error);
+      }
     }
-};
+  };
 
-const handleNextPage = async () => {
+  const handleNextPage = async () => {
     if (formRefs[activeFormTitles[page]] && formRefs[activeFormTitles[page]].current) {
-        // Asegurándonos de que el elemento formElement es válido
-        const formElement = formRefs[activeFormTitles[page]].current.querySelector('div[style*="padding: 15mm"]');
+      // Asegurándonos de que el elemento formElement es válido
+      const formElement = formRefs[activeFormTitles[page]].current.querySelector('div[style*="padding: 15mm"]');
 
-        if (formElement) {
-            const canvas = await html2canvas(formElement, {
-                scale: 2,
-                useCORS: true,
-                logging: true,
-                scrollY: -window.scrollY
-            });
+      if (formElement) {
+        const canvas = await html2canvas(formElement, {
+          scale: 2,
+          useCORS: true,
+          logging: true,
+          scrollY: -window.scrollY
+        });
 
-            const imgData = canvas.toDataURL('image/png');
-            setCapturedImages(prevImages => ({
-                ...prevImages,
-                [activeFormTitles[page]]: imgData
-            }));
-        } else {
-            console.error('No se pudo encontrar el elemento para capturar.');
-        }
+        const imgData = canvas.toDataURL('image/png');
+        setCapturedImages(prevImages => ({
+          ...prevImages,
+          [activeFormTitles[page]]: imgData
+        }));
+      } else {
+        console.error('No se pudo encontrar el elemento para capturar.');
+      }
     }
 
     if (page === activeFormTitles.length - 1) {
-        setLoading(true);
-        try {
-            await captureAndUploadPDFs(true);
+      setLoading(true);
+      try {
+        await captureAndUploadPDFs(true);
 
-            const userId = cookies.get('useR_ID');
-            await axios.patch(`${config.API_URL}/usuarios/UpdateOnbEstado/${userId}`, { onB_ESTADO: false }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            cookies.set('onB_ESTADO', 'false', { path: '/' });
+        const userId = cookies.get('useR_ID');
+        await axios.patch(`${config.API_URL}/usuarios/UpdateOnbEstado/${userId}`, { onB_ESTADO: false }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        cookies.set('onB_ESTADO', 'false', { path: '/' });
 
-            setAlertVisible(true);
-            setTimeout(() => {
-              setAlertVisible(false);
-              window.location.reload();
-            }, 3000);
-        } catch (error) {
-            console.error('Error al enviar el formulario:', error);
-            alert("Ocurrió un error al enviar el formulario");
-        } finally {
-            setLoading(false);
-        }
+        setAlertVisible(true);
+        setTimeout(() => {
+          setAlertVisible(false);
+          window.location.reload();
+        }, 3000);
+      } catch (error) {
+        console.error('Error al enviar el formulario:', error);
+        alert("Ocurrió un error al enviar el formulario");
+      } finally {
+        setLoading(false);
+      }
     } else {
-        setPage(page + 1);
+      setPage(page + 1);
     }
-};
+  };
 
-const handlePreviousPage = () => {
+  const handlePreviousPage = () => {
     if (page > 0) {
       setPage(page - 1);
     }
@@ -256,8 +257,8 @@ const handlePreviousPage = () => {
         return <DisInfo formData={formData} setFormData={setFormData} ref={formRefs[title]} />;
       case "Declaración Jurada de No Tener Antecedentes Penales ni Judiciales SGSI":
         return <NoAntInfo formData={formData} setFormData={setFormData} ref={formRefs[title]} />;
-        case "Pago de Subvenciones":
-          return <SubvInfo formData={formData} setFormData={setFormData} ref={formRefs[title]} />;
+      case "Pago de Subvenciones":
+        return <SubvInfo formData={formData} setFormData={setFormData} ref={formRefs[title]} />;
       case "Pago de Subvenciones RRHH":
         return <SubvDocInfo formData={formData} setFormData={setFormData} ref={formRefs[title]} />;
       default:
@@ -265,9 +266,16 @@ const handlePreviousPage = () => {
     }
   };
 
-  const progressBarWidth = () => {
-    const progressStep = 100 / activeFormTitles.length;
-    return `${progressStep * page}%`;
+  const renderProgressSteps = () => {
+    return activeFormTitles.map((title, index) => (
+      <div
+        key={index}
+        className={`progress-step ${index === page ? 'active' : ''} ${index < page ? 'completed' : ''}`}
+      >
+        <div className="step">{index + 1}</div>
+        {index === page && <p className="active-title">{title}</p>}
+      </div>
+    ));
   };
 
   if (formCompleted) {
@@ -300,18 +308,11 @@ const handlePreviousPage = () => {
         </div>
       )}
       <div className="progressbar">
-        <div
-          style={{
-            width: progressBarWidth(),
-            height: "100%",
-            backgroundColor: "blue",
-            transition: "width 0.5s ease-in-out"
-          }}
-        ></div>
+        {renderProgressSteps()}
       </div>
       <div className="container-lg">
         <div className="header">
-          <h1>{activeFormTitles[page]}</h1>
+          <h1 className="d-none">{activeFormTitles[page]}</h1>
         </div>
         <div className="body">
           <TransitionGroup component={null}>
@@ -321,22 +322,23 @@ const handlePreviousPage = () => {
           </TransitionGroup>
         </div>
         <div className="footer">
-          <button
-            className="btn btn-secondary btn-md me-2"
-            disabled={page === 0}
-            onClick={handlePreviousPage}
-          >
-            Anterior
-          </button>
+          <div className="button-container">
+            <button
+              className="btn btn-secondary btn-md me-2"
+              disabled={page === 0}
+              onClick={handlePreviousPage}
+            >
+              Anterior
+            </button>
 
-          <button
-            className="btn btn-primary btn-md"
-            onClick={handleNextPage}
-            disabled={!isFormComplete}
-          >
-            {page === activeFormTitles.length - 1 ? "Finalizar" : "Siguiente"}
-          </button>
-          <br /><br /><br /><br />
+            <button
+              className="btn btn-primary btn-md"
+              onClick={handleNextPage}
+              disabled={!isFormComplete}
+            >
+              {page === activeFormTitles.length - 1 ? "Finalizar" : "Siguiente"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

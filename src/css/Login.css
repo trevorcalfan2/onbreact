@@ -1,9 +1,9 @@
 @import url("https://fonts.googleapis.com/css?family=Fira+Sans:400,500,600,700,800");
 @import url('https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap');
+
 * {
   box-sizing: border-box;
 }
-
 
 h1,
 h2,
@@ -26,44 +26,98 @@ html,
   height: 100%;
 }
 
-.navbar-light {
-  background-color: #ffffff;
-  box-shadow: 0px 14px 80px rgba(34, 35, 58, 0.2);
-}
 .auth-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-  height: 100vh; /* Cambiamos a 100vh para asegurar que ocupe toda la altura de la ventana */
+  height: 100vh;
+  background-color: #f0f0eb; /* Fondo blanco */
 }
 
-.auth-inner {
-  width: 450px;
-  background: #ffffff;
-  box-shadow: 0px 14px 80px rgba(34, 35, 58, 0.2);
-  padding: 40px 55px 45px 55px;
+.auth-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #04009a; /* Color de fondo más oscuro de la paleta */
+  padding: 40px;
   border-radius: 15px;
-  transition: all 0.3s;
+  box-shadow: 0px 14px 80px rgba(34, 35, 58, 0.2);
+  color: white;
+  width: 900px;
+  position: relative;
 }
 
-
-.admin-view {
-  background-color: #333333;
+.auth-left {
+  background: #b3d7ff; /* Color claro de la paleta */
+  padding: 40px;
+  border-radius: 15px;
+  margin-right: 20px;
+  width: 50%;
 }
 
-.admin-view .form-control {
-  background-color: #555555;
-  color: #ffffff;
+.auth-right {
+  text-align: left;
+  width: 50%;
 }
 
-.admin-view .btn-primary {
-  background-color: #007bff;
+.auth-right h1 {
+  color: #ffffff; /* Color blanco */
+  margin-bottom: 20px;
+}
+
+.form-control {
+  background-color: #ffffff; /* Color de fondo de los campos de entrada */
+  color: #04009a;
+  border: 1px solid #04009a;
+  margin-bottom: 20px;
+}
+
+.btn-primary {
+  background-color: #007bff; /* Color azul claro */
   border-color: #007bff;
+  color: #ffffff;
 }
 
-.admin-view .btn-secondary {
-  background-color: #6c757d;
-  border-color: #6c757d;
-  color: #ffffff;
+.btn-link {
+  background-color: #ffffff; /* Fondo blanco */
+  color: #04009a; /* Color de texto azul oscuro */
+  border: 1px solid #04009a;
+  border-radius: 5px;
+  padding: 10px 15px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.alert {
+  margin-top: 20px;
+}
+
+.logo-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+@media (max-width: 768px) {
+  .auth-container {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .auth-left {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+
+  .auth-right {
+    width: 100%;
+    text-align: center;
+  }
+
+  .logo-container {
+    position: static;
+    margin-bottom: 20px;
+  }
 }

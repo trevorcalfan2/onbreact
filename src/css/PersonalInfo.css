@@ -1,0 +1,51 @@
+.container.custom-card-bg {
+    background-color: #3EDBF0;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .text-light {
+    color: #ffffff;
+  }
+  
+  .form-control,
+  .form-control-file,
+  .btn-primary {
+    margin-bottom: 10px;
+  }
+  
+  .img-thumbnail {
+    max-height: 200px;
+    max-width: 100%;
+    margin-top: 10px;
+  }
+  
+  .form-group label {
+    font-weight: bold;
+  }
+  
+  .custom-card-bg .form-control {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 10px;
+  }
+  
+  .custom-card-bg .form-control:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 5px rgba(128, 189, 255, 0.5);
+  }
+  
+  .btn-primary {
+    background-color: #0069d9;
+    border-color: #0062cc;
+  }
+  
+  .btn-primary:hover {
+    background-color: #005cbf;
+    border-color: #0056b3;
+  }
+  

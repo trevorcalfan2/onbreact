@@ -3,9 +3,9 @@ import axios from 'axios';
 import config from '../../config.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import '../../css/Index.css'
+import '../../css/Index.css';
 
-function Welcome() {
+const Welcome = ({ setView }) => {
     const [configData, setConfigData] = useState({
         VIDEOLINK: '',
         BIENVENIDA: ''
@@ -38,21 +38,40 @@ function Welcome() {
         return link;
     };
 
+    const handleButtonClick = () => {
+        setView('about');
+    };
+
     return (
-        <div className="container text-center" style={{ marginTop: '-3rem' }}>
-            <h1 className="mb-4">¡Bienvenido/a a nuestro equipo!</h1>
-            <div className="video-container mb-4" style={{ width: '640px', height: '360px', margin: '0 auto' }}>
-                <iframe
-                    width="640"
-                    height="360"
-                    src={getEmbeddedVideoLink(configData.VIDEOLINK)}
-                    allowFullScreen
-                    title="Bienvenida Video"
-                ></iframe>
+        <div>
+            <div className='welcome-container'>
+                <div className="row">
+                    <div className="col-md-6 text-section">
+                        <h1>¡Bienvenido/a a nuestro equipo!</h1>
+                        <p>{configData.BIENVENIDA}</p>
+                    </div>
+                    <div className="col-md-6 video-section">
+                        <iframe
+                            src={getEmbeddedVideoLink(configData.VIDEOLINK)}
+                            allowFullScreen
+                            title="Bienvenida Video"
+                            className="mb-3"
+                        ></iframe>
+                    </div>
+                </div>
+                <div className="row mt-3">
+                    <div className="col-md-12 d-flex justify-content-end">
+                        <button
+                            className="btn btn-primary"
+                            onClick={handleButtonClick}
+                        >
+                            Conócenos
+                        </button>
+                    </div>
+                </div>
             </div>
-            <p style={{ whiteSpace: 'pre-line' }}>{configData.BIENVENIDA}</p>
         </div>
     );
-}
+};
 
 export default Welcome;

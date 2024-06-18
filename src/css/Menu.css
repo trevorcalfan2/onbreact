@@ -69,7 +69,7 @@ span {
 #sidebar {
     min-width: 250px;
     max-width: 250px;
-    background: #405FF0;
+    background: #77ACF1;
     color: #fff;
     transition: all 0.3s;
     position: fixed; /* Fija el sidebar en la pantalla */

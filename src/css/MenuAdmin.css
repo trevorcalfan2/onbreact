@@ -69,7 +69,7 @@ span {
 #sidebar {
     min-width: 250px;
     max-width: 250px;
-    background: #405FF0;
+    background: #04009A;
     color: #fff;
     transition: all 0.3s;
     position: fixed;
@@ -142,7 +142,7 @@ span {
 
 #sidebar .sidebar-header {
     padding: 20px;
-    background: #405FF0;
+    background: #04009A;
 }
 
 #sidebar .sidebar-header strong {

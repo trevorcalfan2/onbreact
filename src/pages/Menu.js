@@ -7,6 +7,7 @@ import Form from '../components/Onboarding/Form';
 import Welcome from '../components/UserSide/Welcome';
 import Func from '../components/UserSide/Func';
 import About from '../components/UserSide/About';
+import Ev from '../components/UserSide/Ev';
 
 function Menu() {
     const cookies = new Cookies();
@@ -72,21 +73,21 @@ function Menu() {
       
         switch (view) {
           case 'welcome':
-            return <Welcome />;
+            return <Welcome setView={setView} />;
           case 'form':
             if (onBEstado === false) {
                 return <div>Ya has completado todos los formularios.</div>;
             }
-           else{
-            return <Form />;
-           }
-            
+           else{return <Form />;}
           case 'func':
             return <Func />;
           case 'about':
-            return <About />;
+            return <About setView={setView} />;
+          case 'ev':
+            return <Ev  />;
+
           default:
-            return <Welcome />;
+            return <Welcome setView={setView} />;
         }
       };
       
@@ -155,21 +156,28 @@ function Menu() {
                                 </a>
                             </li>
                             <li>
+                                <a href="#" onClick={() => handleButtonClick('about')} className={view === 'about' ? 'active' : ''}>
+                                    <i className="fas fa-info-circle"></i>
+                                    Conócenos
+                                </a>
+                            </li>
+                            <li>
                                 <a href="#" onClick={() => handleButtonClick('form')} className={view === 'form' ? 'active' : ''}>
                                     <i className="fas fa-file-alt"></i>
                                     Documentos
                                 </a>
                             </li>
+
                             <li>
                                 <a href="#" onClick={() => handleButtonClick('func')} className={view === 'func' ? 'active' : ''}>
-                                    <i className="fas fa-tasks"></i>
-                                    Funciones a realizar
+                                    <i className="fas fa-stream"></i>
+                                    Inducción
                                 </a>
                             </li>
                             <li>
-                                <a href="#" onClick={() => handleButtonClick('about')} className={view === 'about' ? 'active' : ''}>
-                                    <i className="fas fa-info-circle"></i>
-                                    Conócenos
+                                <a href="#" onClick={() => handleButtonClick('ev')} className={view === 'ev' ? 'active' : ''}>
+                                    <i className="fas fa-tasks"></i>
+                                    Evaluacion
                                 </a>
                             </li>
                         </ul>
