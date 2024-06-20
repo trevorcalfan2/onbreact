@@ -1,3 +1,16 @@
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,p,
+label,
+span {
+  
+  font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
 /* Estilo para la superposición oscura */
 .modal-overlay {
   position: fixed;
@@ -104,6 +117,8 @@
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   color: #f0f0eb; /* Light color text */
+  
+
 }
 
 .custom-card-bg h2, .custom-card-bg p {
@@ -114,15 +129,13 @@
   border: none;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  background: #04009A; /* Dark blue background */
-  color: #f0f0eb; /* Light color text */
+  
+  background: #04009A; /* Fondo azul oscuro */
+  color: #f0f0eb;  /* Color de texto claro */
   transition: transform 0.2s ease-in-out;
 }
 
-.custom-card:hover {
-  transform: translateY(-10px);
-}
+
 
 .custom-card-body {
   padding: 20px;
@@ -131,7 +144,7 @@
 .custom-card-title {
   font-size: 1.25rem;
   font-weight: bold;
-  color: white; /* Light blue color */
+  color: "#f0f0eb"; ; /* Light blue color */
 }
 
 .custom-card-text {

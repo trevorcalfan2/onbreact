@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import '../css/Login.css';
 import logo from '../images/logo.jpg'; // Ajusta la ruta a tu logo
 import config from '../config';
+import back from '../images/backlogin.jpg';
 
 function Login(props) {
     const baseUrl = `${config.API_URL}/usuarios`;
@@ -132,7 +133,7 @@ function Login(props) {
     }
 
     return (
-        <div className="auth-wrapper">
+        <div className="auth-wrapper" style={{ backgroundImage: `url(${back})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
             <div className="auth-container">
                 <div className="auth-left">
                     <div className="mb-3">

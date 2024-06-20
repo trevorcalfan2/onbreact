@@ -179,7 +179,7 @@ function Videos() {
         <div className="container">
             <div className="d-flex justify-content-between mb-3">
                 <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-                    <i className="fas fa-plus"></i> Crear Video
+                    <i className="fas fa-plus"></i> Añadir Video
                 </button>
                 <div className="d-flex align-items-center">
                     <input
@@ -232,7 +232,7 @@ function Videos() {
                         </th>
                         <th>ID</th>
                         <th>Titulo</th>
-                        <th>Descripcion</th>
+                        <th  className='d-none'>Descripcion</th>
                         <th>Link</th>
                         <th>Acciones</th>
                     </tr>
@@ -249,7 +249,7 @@ function Videos() {
                             </td>
                             <td>{video.id}</td>
                             <td>{video.titulo}</td>
-                            <td>{video.descripcion}</td>
+                            <td  className='d-none'>{video.descripcion}</td>
                             <td>{video.link}</td>
                             <td>
                                 <button 
@@ -260,11 +260,17 @@ function Videos() {
                                     <i className="fas fa-edit"></i>
                                 </button>
                                 <button 
-                                    className="btn btn-danger btn-sm" 
+                                    className="btn btn-danger btn-sm me-1" 
                                     onClick={() => handleDelete(video.id)}
                                     disabled={selectedRows.includes(video.id)}
                                 >
                                     <i className="fas fa-trash"></i>
+                                </button>
+                                <button 
+                                    className="btn btn-info btn-sm"
+                                    onClick={() => window.open(video.link, '_blank')}
+                                >
+                                    <i className="fas fa-external-link-alt"></i>
                                 </button>
                             </td>
                         </tr>
@@ -298,7 +304,7 @@ function Videos() {
                         <div className="modal-dialog">
                             <div className="modal-content">
                                 <div className="modal-header">
-                                    <h5 className="modal-title">Crear Video</h5>
+                                    <h5 className="modal-title">Añadir Video</h5>
                                     <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
                                 </div>
                                 <div className="modal-body">
@@ -336,7 +342,7 @@ function Videos() {
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cerrar</button>
-                                    <button type="button" className="btn btn-primary" onClick={handleCreate}>Crear</button>
+                                    <button type="button" className="btn btn-primary" onClick={handleCreate}>Añadir</button>
                                 </div>
                             </div>
                         </div>

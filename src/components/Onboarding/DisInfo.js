@@ -22,10 +22,11 @@ const DisInfo = forwardRef(({ formData, setFormData }, ref) => {
   };
 
   const containerStyle = {
-    width: '211mm',
+    width: '228mm',
+
     minHeight: '297mm',
     padding: '15mm', // Reduced padding
-    border: '1px solid #000',
+    //border: '1px solid #000',
     margin: '0 auto',
     backgroundColor: '#fff',
     boxSizing: 'border-box' // Ensures padding is included in the width/height
@@ -41,7 +42,7 @@ const DisInfo = forwardRef(({ formData, setFormData }, ref) => {
   };
 
   const logoStyle = {
-    width: '150px',
+    width: '60px',
     height: 'auto'
   };
 
@@ -57,7 +58,7 @@ const DisInfo = forwardRef(({ formData, setFormData }, ref) => {
       <br />
       <div style={containerStyle}>
         <div style={headerStyle}>
-          <img src="/path-to-your-image/logo.png" alt="Logo" style={logoStyle} />
+          <img src="logo.jpg" alt="Logo" style={logoStyle} />
           <h2 style={{ textAlign: 'center', textDecoration: 'underline', flex: 1, marginLeft: '20px' }}>PROCESO DISCIPLINARIO</h2>
           <div style={{ textAlign: 'right' }}>
             <p>AKG-RH-F-07</p>

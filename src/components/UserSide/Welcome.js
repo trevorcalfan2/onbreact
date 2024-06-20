@@ -3,7 +3,7 @@ import axios from 'axios';
 import config from '../../config.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import '../../css/Index.css';
+
 
 const Welcome = ({ setView }) => {
     const [configData, setConfigData] = useState({

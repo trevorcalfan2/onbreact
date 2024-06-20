@@ -27,7 +27,7 @@ function Ev() {
     };
 
     return (
-        <div className="container d-flex justify-content-center">
+        <div className="container d-flex justify-content-center mt-0">
             <div className="custom-card p-3" style={{ width: '100%', maxWidth: '700px' }}>
                 <div className="card-body">
                     {loading ? (

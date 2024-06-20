@@ -61,7 +61,7 @@ function SubvInfo({ formData, setFormData }) {
     };
 
     return (
-        <div className="container custom-card-bg  p-4 mb-4" style={{backgroundColor:"#77ACF1"}}>
+        <div className="container custom-card-bg  p-4 mb-4" style={{backgroundColor:"#00499a"}}>
             <h3 className="mb-4">A continuación se muestra un formulario donde ingresarás tus datos personales de pago:</h3>
             <p>Se recomienda revisar antes de proceder con el siguiente paso.</p>
             <br />

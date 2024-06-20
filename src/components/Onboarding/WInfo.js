@@ -9,7 +9,7 @@ function WInfo({ formData, setFormData }) {
             <div className="card custom-card-bg text-white p-4">
                 <div className="row align-items-center">
                     <div className="col-md-6">
-                        <h2>¡Estamos encantados de darte la bienvenida a Angkor Perú!</h2>
+                        <h2>¡Estamos encantados de darte la bienvenida a Angkor Group!</h2>
                         <p>
                             Para asegurarnos de que tu incorporación sea lo más fluida posible, necesitamos que completes y subas algunos documentos esenciales antes de tu primer día. 
                             Estos documentos nos ayudarán a prepararte adecuadamente para tu integración y a cumplir con las regulaciones de la empresa.

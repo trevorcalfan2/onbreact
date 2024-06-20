@@ -43,10 +43,10 @@ function ConfDeclaration({ formData, setFormData, innerRef }) {
     };
 
     const containerStyle = {
-        width: '211mm',
+        width: '228mm',
         minHeight: '297mm',
         padding: '15mm', // Reduced padding
-        border: '1px solid #000',
+      //  border: '1px solid #000',
         margin: '0 auto',
         backgroundColor: '#fff',
         boxSizing: 'border-box' // Ensures padding is included in the width/height

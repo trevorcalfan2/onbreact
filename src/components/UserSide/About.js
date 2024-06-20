@@ -3,7 +3,8 @@ import axios from 'axios';
 import config from '../../config';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import '../../css/Form.css';  // Importa los estilos de Form
+
+
 
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
@@ -105,9 +106,9 @@ const About = ({ setView }) => {
         };
 
         return (
-            <div className="row align-items-center">
-                <div className="col-md-12">
-                    <div className="custom-card h-100 mt-3">
+            <div className="row align-items-center mt-0 ">
+                <div className="col-md-12 mt-0">
+                    <div className="custom-card h-100 m-0">
                         <div className="custom-card-body d-flex">
                             <div className="text-section col-md-6 d-flex flex-column justify-content-center">
                                 <p className="me-3 custom-card-text" style={{ whiteSpace: 'pre-wrap' }}>{pageData[page].text}</p>

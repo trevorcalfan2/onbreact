@@ -152,7 +152,7 @@ function Config() {
                 <div className="mb-3">
                     <label htmlFor="VISION" className="form-label">Visión</label>
                     <textarea className="form-control" id="VISION" name="VISION" value={configData.VISION} onChange={handleChange} rows="3" />
-                    <input type="file" className="form-control mt-2" onChange={(e) => handleImageChange(e, 'visionimg')} />
+                    <input type="file" className="form-control mt-2" accept=".jpg" onChange={(e) => handleImageChange(e, 'visionimg')} />
                     {configData.visionImage && (
                         <div className="mt-2">
                             <img src={configData.visionImage} alt="Visión" className="img-thumbnail" style={{ maxHeight: '150px' }} />
@@ -163,7 +163,7 @@ function Config() {
                 <div className="mb-3">
                     <label htmlFor="MISION" className="form-label">Misión</label>
                     <textarea className="form-control" id="MISION" name="MISION" value={configData.MISION} onChange={handleChange} rows="3" />
-                    <input type="file" className="form-control mt-2" onChange={(e) => handleImageChange(e, 'misionimg')} />
+                    <input type="file" className="form-control mt-2" accept=".jpg" onChange={(e) => handleImageChange(e, 'misionimg')} />
                     {configData.misionImage && (
                         <div className="mt-2">
                             <img src={configData.misionImage} alt="Misión" className="img-thumbnail" style={{ maxHeight: '150px' }} />
@@ -174,7 +174,7 @@ function Config() {
                 <div className="mb-3">
                     <label htmlFor="NOSOTROS" className="form-label">Nosotros</label>
                     <textarea className="form-control" id="NOSOTROS" name="NOSOTROS" value={configData.NOSOTROS} onChange={handleChange} rows="3" />
-                    <input type="file" className="form-control mt-2" onChange={(e) => handleImageChange(e, 'nosotrosimg')} />
+                    <input type="file" className="form-control mt-2" accept=".jpg" onChange={(e) => handleImageChange(e, 'nosotrosimg')} />
                     {configData.nosotrosImage && (
                         <div className="mt-2">
                             <img src={configData.nosotrosImage} alt="Nosotros" className="img-thumbnail" style={{ maxHeight: '150px' }} />

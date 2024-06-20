@@ -10,6 +10,7 @@ import CreateUser from '../components/UserCrud/CreateUser';
 import Config from '../components/AdminView/Config';
 import Onboarding from '../components/AdminView/ONBConf';
 import Videos from '../components/AdminView/Videos';
+import Contacts from '../components/AdminView/Contacts';
 
 function MenuAdmin() {
     const cookies = new Cookies();
@@ -80,6 +81,8 @@ function MenuAdmin() {
                 return <Onboarding />;
             case 'videos':
                 return <Videos />;
+            case 'contacts':
+                    return <Contacts />;
             default:
                 return <User />;
         }
@@ -154,6 +157,12 @@ function MenuAdmin() {
                             <a href="#" onClick={() => handleButtonClick('videos')} className={view === 'videos' ? 'active' : ''}>
                                 <i className="fas fa-video"></i>
                                 Videos
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" onClick={() => handleButtonClick('contacts')} className={view === 'contacts' ? 'active' : ''}>
+                                <i className="fas fa-address-book"></i>
+                                Contactos
                             </a>
                         </li>
                     </ul>

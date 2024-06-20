@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
-import WInfo from "./WInfo";
-import IntroInfo from "./IntroInfo";
-import PersonalInfo from "./PersonalInfo";
-import SubvInfo from "./SubvInfo";
-import ConfInfo from "./ConfInfo";
-import DisInfo from "./DisInfo";
-import NoAntInfo from "./NoAntInfo";
-import SubvDocInfo from "./SubvDocInfo";
+import React, { useState, useEffect, useRef } from 'react';
+import WInfo from './WInfo';
+import IntroInfo from './IntroInfo';
+import PersonalInfo from './PersonalInfo';
+import SubvInfo from './SubvInfo';
+import ConfInfo from './ConfInfo';
+import DisInfo from './DisInfo';
+import NoAntInfo from './NoAntInfo';
+import SubvDocInfo from './SubvDocInfo';
 import '../../css/Form.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
@@ -16,7 +16,7 @@ import Cookies from 'universal-cookie';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-function Form() {
+function Form({ setView }) {
   const cookies = new Cookies();
   const formRefs = {
     "Acuerdo de Confidencialidad SGSI": useRef(null),
@@ -51,10 +51,14 @@ function Form() {
     agree: false,
     agreeDis: false,
     agreeNoAnt: false,
-    agreeSubv: false
+    agreeSubv: false,
+    profilePhoto: ""
   });
   const [capturedImages, setCapturedImages] = useState({});
-  const [alertVisible, setAlertVisible] = useState(false);
+
+  // Variables para mover la imagen
+  const [imagePosition, setImagePosition] = useState({ x: 8, y: 0 });
+  const [imageScale, setImageScale] = useState(0.93);
 
   useEffect(() => {
     const fetchActiveTasks = async () => {
@@ -143,18 +147,17 @@ function Form() {
     let imagesToCapture = { ...capturedImages };
 
     if (final && formRefs[activeFormTitles[page]] && formRefs[activeFormTitles[page]].current) {
-      // Asegurándonos de que el elemento formElement es válido
       const formElement = formRefs[activeFormTitles[page]].current.querySelector('div[style*="padding: 15mm"]');
 
       if (formElement) {
         const canvas = await html2canvas(formElement, {
-          scale: 2,
+          scale: 1.5, // Aumentar la escala para mayor calidad
           useCORS: true,
           logging: true,
           scrollY: -window.scrollY
         });
 
-        const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL('image/jpeg', 1.0); // Guardar como JPEG con alta calidad
         imagesToCapture = { ...imagesToCapture, [activeFormTitles[page]]: imgData };
       } else {
         console.error('No se pudo encontrar el elemento para capturar.');
@@ -166,8 +169,35 @@ function Form() {
       const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+      // Ajustar el tamaño de la imagen en el PDF
+      const imgWidth = pdfWidth * imageScale;
+      const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+      pdf.addImage(imgData, 'JPEG', imagePosition.x, imagePosition.y, imgWidth, imgHeight);
+      
       const pdfBlob = pdf.output('blob');
+      const fileSize = pdfBlob.size / 1024 / 1024; // Convertir a MB
+
+      if (fileSize > 5) {
+        console.error(`PDF demasiado grande: ${fileSize.toFixed(2)} MB. Comprimiendo...`);
+        const compressionRate = 5 / fileSize; // Calcular tasa de compresión necesaria
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const image = new Image();
+        image.src = imgData;
+        await new Promise((resolve) => {
+          image.onload = () => {
+            canvas.width = image.width * compressionRate;
+            canvas.height = image.height * compressionRate;
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            const compressedImgData = canvas.toDataURL('image/jpeg', 0.7); // Comprimir imagen
+            pdf.addImage(compressedImgData, 'JPEG', imagePosition.x, imagePosition.y, imgWidth, imgHeight);
+            resolve();
+          };
+        });
+      }
+
       const formData = new FormData();
       formData.append('file', pdfBlob, `${userId}-${title}.pdf`);
       formData.append('userId', userId);
@@ -183,22 +213,38 @@ function Form() {
         console.error('Error uploading PDF:', error);
       }
     }
+
+    if (final && formData.profilePhoto) {
+      const profilePhotoBlob = await fetch(formData.profilePhoto).then(res => res.blob());
+      const profilePhotoFormData = new FormData();
+      profilePhotoFormData.append('file', profilePhotoBlob, `${userId}.jpg`);
+      profilePhotoFormData.append('prefix', userId);
+
+      try {
+        await axios.post(`${config.API_URL}/ImageManagement/uploadImage`, profilePhotoFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+      } catch (error) {
+        console.error('Error uploading profile photo:', error);
+      }
+    }
   };
 
   const handleNextPage = async () => {
     if (formRefs[activeFormTitles[page]] && formRefs[activeFormTitles[page]].current) {
-      // Asegurándonos de que el elemento formElement es válido
       const formElement = formRefs[activeFormTitles[page]].current.querySelector('div[style*="padding: 15mm"]');
 
       if (formElement) {
         const canvas = await html2canvas(formElement, {
-          scale: 2,
+          scale: 1.5, // Aumentar la escala para mayor calidad
           useCORS: true,
           logging: true,
           scrollY: -window.scrollY
         });
 
-        const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL('image/jpeg', 1.0); // Guardar como JPEG con alta calidad
         setCapturedImages(prevImages => ({
           ...prevImages,
           [activeFormTitles[page]]: imgData
@@ -221,11 +267,8 @@ function Form() {
         });
         cookies.set('onB_ESTADO', 'false', { path: '/' });
 
-        setAlertVisible(true);
-        setTimeout(() => {
-          setAlertVisible(false);
-          window.location.reload();
-        }, 3000);
+       setView('endform'); // Redirigir a EndForm después de finalizar
+     
       } catch (error) {
         console.error('Error al enviar el formulario:', error);
         alert("Ocurrió un error al enviar el formulario");
@@ -294,7 +337,7 @@ function Form() {
   }
 
   return (
-    <div className="form">
+    <div className="form" >
       {loading && (
         <div className="loading-overlay">
           <div className="spinner-border text-primary" role="status">
@@ -302,19 +345,15 @@ function Form() {
           </div>
         </div>
       )}
-      {alertVisible && (
-        <div className="alert alert-success position-fixed bottom-0 end-0 m-3" role="alert">
-          Formulario enviado exitosamente
-        </div>
-      )}
+
       <div className="progressbar">
         {renderProgressSteps()}
       </div>
-      <div className="container-lg">
+      <div className="container-lg" >
         <div className="header">
           <h1 className="d-none">{activeFormTitles[page]}</h1>
         </div>
-        <div className="body">
+        <div className="body" >
           <TransitionGroup component={null}>
             <CSSTransition key={page} timeout={300} classNames="fade">
               <div ref={formRefs[activeFormTitles[page]]}>{PageDisplay()}</div>

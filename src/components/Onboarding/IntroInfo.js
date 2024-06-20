@@ -1,6 +1,6 @@
 import React from 'react';
 import '../../css/Index.css';
-import '../../css/IntroInfo.css';
+
 
 
 
@@ -35,7 +35,7 @@ function IntroInfo({ formData, setFormData, activeTasks }) {
       {/* Lista de Cards */}
       <div className="row row-cols-1 row-cols-md-2 g-4">
         {cardData.map(card => activeTasks.includes(card.taskId) && (
-          <div className="col" key={card.taskId}>
+          <div className="col " key={card.taskId}>
             <div className="custom-card">
               <div className="custom-card-body">
                 <h5 className="custom-card-title">{card.title}</h5>
