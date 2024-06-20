@@ -10,6 +10,7 @@ import About from '../components/UserSide/About';
 import Ev from '../components/UserSide/Ev';
 import axios from 'axios';
 import config from '../config';
+import EndForm from '../components/Onboarding/EndForm'
 
 function Menu() {
     const cookies = new Cookies();
@@ -135,13 +136,16 @@ function Menu() {
             if (onBEstado === false) {
                 return <div>Ya has completado todos los formularios.</div>;
             }
-           else{return <Form />;}
+           else{return <Form setView={setView} />;}
           case 'func':
             return <Func setView={setView} />;
           case 'about':
             return <About setView={setView} />;
           case 'ev':
-            return <Ev  />;
+            return <Ev setView={setView} />;
+        case 'endform':
+                return <EndForm setView={setView} />;
+
           default:
             return <Welcome setView={setView} />;
         }
