@@ -175,7 +175,7 @@ const About = ({ setView }) => {
                             onClick={handleNextPage}
                             disabled={!checkList[pages[page].toLowerCase()]}
                         >
-                            {page === pages.length - 1 ? "Continuar en Documentos" : "Siguiente"}
+                            {page === pages.length - 1 ? "Ir a Documentos" : "Siguiente"}
                         </button>
                     </div>
                 </div>

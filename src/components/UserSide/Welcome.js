@@ -65,7 +65,7 @@ const Welcome = ({ setView }) => {
                             className="btn btn-primary"
                             onClick={handleButtonClick}
                         >
-                            Conócenos
+                            Conócenos >>
                         </button>
                     </div>
                 </div>

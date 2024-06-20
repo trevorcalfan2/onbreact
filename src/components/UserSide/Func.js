@@ -151,11 +151,11 @@ const Func = ({ setView }) => {
         <div className="container mb-0">
             <div className="custom-card">
                 <div className="custom-card-body d-flex">
-                    <div className="text-section col-md-6 d-flex flex-column justify-content-center me-3">
+                    <div className="text-section col-md-6 d-flex flex-column justify-content-center p-3">
                         <h2 className="custom-card-title text-break fs-4">{video.titulo}</h2>
                         <p className="custom-card-text text-break">{video.descripcion}</p>
                     </div>
-                    <div className="image-section col-md-6 d-flex align-items-center justify-content-center">
+                    <div className="image-section col-md-6 d-flex align-items-center justify-content-center p-3">
                         <iframe
                             width="100%"
                             height="315"

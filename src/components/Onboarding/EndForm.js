@@ -14,7 +14,7 @@ function EndForm({ setView }) {
                     <p className="custom-card-text">
                         Hemos recibido todos los documentos necesarios para tu incorporación a ANGKOR PERU. A continuación, revisaremos la información y te informaremos si necesitamos algo más de tu parte.
                     </p>
-                    <button className="btn btn-primary" onClick={() => setView('func')}>Continuar en Inducción</button>
+                    <button className="btn btn-primary" onClick={() => setView('func')}>Ir a Inducción</button>
                 </div>
             </div>
         </div>
