@@ -23,13 +23,11 @@ const NoAntInfo = forwardRef(({ formData, setFormData }, ref) => {
 
     const containerStyle = {
         width: '228mm',
-
         minHeight: '297mm',
-        padding: '15mm', // Reduced padding
-      //  border: '1px solid #000',
+        padding: '15mm',
         margin: '0 auto',
         backgroundColor: '#fff',
-        boxSizing: 'border-box' // Ensures padding is included in the width/height
+        boxSizing: 'border-box'
     };
 
     const handleCheckboxChange = (e) => {
@@ -42,28 +40,30 @@ const NoAntInfo = forwardRef(({ formData, setFormData }, ref) => {
     return (
         <div ref={ref}>
             <br/>
-            <div style={containerStyle}>
-                <h2 style={{ textAlign: 'center', textDecoration: 'underline' }}>DECLARACIÓN JURADA DE NO TENER ANTECEDENTES POLICIALES NI JUDICIALES</h2>
-                <p style={textStyle}>
-                    Por el presente documento 
-                    Yo <strong>{formData.nombre} {formData.apellido}</strong> identificado (a) con D.N.I. Nº <strong>{formData.dni}</strong> con domicilio en <strong>{formData.domicilio}</strong> del distrito de <strong>{formData.distrito}</strong> Provincia de <strong>LIMA</strong> Departamento de <strong>LIMA</strong>.
-                </p>
-                <p style={textStyle}>
-                    DECLARO BAJO JURAMENTO: NO REGISTRAR ANTECEDENTES POLICIALES NI JUDICIALES.
-                </p>
-                <p style={textStyle}>
-                    En caso de resultar falsa la información que proporciono declare haber incurrido en el delito de falsa declaración en Procesos Administrativos – Artículo 411º del Código Penal y Delito contra la fe Pública – Titulo XIX del Código Penal acorde al artículo 32º de la Ley Nº 27444 Ley del Procedimiento Administrativos General. 
-                </p>
-                <p style={textStyle}>
-                    En fe de lo cual firmo la presente a los <strong>{currentDate}</strong>
-                </p>
-                <div style={{ marginTop: '20px', textAlign: 'left' }}>
-                    {formData.fotoDni && (
-                        <img src={formData.fotoDni} alt="Foto DNI" style={{ maxHeight: '150px', maxWidth: '350px', display: 'block', marginBottom: '10px' }} />
-                    )}
-                    <p style={textStyle}>__________________________________________</p>
-                    <p style={textStyle}>Firma</p>
-                    <p style={textStyle}>DNI: <strong>{formData.dni}</strong></p>
+            <div className="scroll-container">
+                <div className="form-content" style={containerStyle}>
+                    <h2 style={{ textAlign: 'center', textDecoration: 'underline' }}>DECLARACIÓN JURADA DE NO TENER ANTECEDENTES POLICIALES NI JUDICIALES</h2>
+                    <p style={textStyle}>
+                        Por el presente documento 
+                        Yo <strong>{formData.nombre} {formData.apellido}</strong> identificado (a) con D.N.I. Nº <strong>{formData.dni}</strong> con domicilio en <strong>{formData.domicilio}</strong>  del distrito de <strong>{formData.distrito}</strong> Provincia de <strong>LIMA </strong> Departamento de <strong>LIMA</strong>.
+                    </p>
+                    <p style={textStyle}>
+                        DECLARO BAJO JURAMENTO: NO REGISTRAR ANTECEDENTES POLICIALES NI JUDICIALES.
+                    </p>
+                    <p style={textStyle}>
+                        En caso de resultar falsa la información que proporciono declare haber incurrido en el delito de falsa declaración en Procesos Administrativos – Artículo 411º del Código Penal y Delito contra la fe Pública – Titulo XIX del Código Penal acorde al artículo 32º de la Ley Nº 27444 Ley del Procedimiento Administrativos General. 
+                    </p>
+                    <p style={textStyle}>
+                        En fe de lo cual firmo la presente a los <strong>{currentDate}</strong>
+                    </p>
+                    <div style={{ marginTop: '20px', textAlign: 'left' }}>
+                        {formData.fotoDni && (
+                            <img src={formData.fotoDni} alt="Foto DNI" style={{ maxHeight: '150px', maxWidth: '350px', display: 'block', marginBottom: '10px' }} />
+                        )}
+                        <p style={textStyle}>__________________________________________</p>
+                        <p style={textStyle}>Firma</p>
+                        <p style={textStyle}>DNI: <strong>{formData.dni}</strong></p>
+                    </div>
                 </div>
             </div>
             <br/>

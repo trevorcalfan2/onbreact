@@ -160,6 +160,7 @@ const About = ({ setView }) => {
                         </label>
                     </div>
                 </div>
+                <br/>
                 <div className="footer">
                     <div className="button-container">
                         <button

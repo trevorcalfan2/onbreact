@@ -320,7 +320,22 @@ function Form({ setView }) {
       </div>
     ));
   };
+  const scrollToActiveStep = () => {
+    const activeStep = document.querySelector('.progress-step.active');
+    if (activeStep) {
+        const progressBar = document.querySelector('.progressbar');
+        const offsetLeft = activeStep.offsetLeft;
+        const scrollLeft = offsetLeft - (window.innerWidth / 2 - activeStep.clientWidth / 2);
+        progressBar.scrollTo({
+            left: scrollLeft,
+            behavior: 'smooth'
+        });
+    }
+};
 
+useEffect(() => {
+    scrollToActiveStep();
+}, [page]);
   if (formCompleted) {
     return (
       <div className="form">

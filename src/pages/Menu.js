@@ -10,7 +10,8 @@ import About from '../components/UserSide/About';
 import Ev from '../components/UserSide/Ev';
 import axios from 'axios';
 import config from '../config';
-import EndForm from '../components/Onboarding/EndForm'
+import EndForm from '../components/Onboarding/EndForm';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 function Menu() {
     const cookies = new Cookies();
@@ -24,6 +25,7 @@ function Menu() {
     const [newProfilePhoto, setNewProfilePhoto] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
     const [isUpdating, setIsUpdating] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const cerrarSesion = () => {
         cookies.remove('useR_ID', { path: '/' });
@@ -55,7 +57,6 @@ function Menu() {
                 const imageObjectURL = URL.createObjectURL(response.data);
                 setProfilePhoto(imageObjectURL);
 
-                // Clean up the object URL to avoid memory leaks
                 return () => {
                     URL.revokeObjectURL(imageObjectURL);
                 };
@@ -64,14 +65,19 @@ function Menu() {
             }
         };
         fetchProfilePhoto();
-    }, []);  // Notice the empty dependency array here
+    }, []);
 
     const handleButtonClick = (viewName) => {
         setView(viewName);
+        setSidebarOpen(false);
     };
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
+    };
+
+    const toggleSidebar = () => {
+        setSidebarOpen(!sidebarOpen);
     };
 
     const handleOutsideClick = (event) => {
@@ -114,7 +120,6 @@ function Menu() {
             setNewProfilePhoto(null);
             setShowProfileModal(false);
 
-            // Clean up the object URL to avoid memory leaks
             return () => {
                 URL.revokeObjectURL(imageObjectURL);
             };
@@ -128,28 +133,28 @@ function Menu() {
 
     const renderComponent = () => {
         const onBEstado = cookies.get('onB_ESTADO');
-        
+
         switch (view) {
-          case 'welcome':
-            return <Welcome setView={setView} />;
-          case 'form':
-            if (onBEstado === false) {
-                return <div>Ya has completado todos los formularios.</div>;
-            }
-           else{return <Form setView={setView} />;}
-          case 'func':
-            return <Func setView={setView} />;
-          case 'about':
-            return <About setView={setView} />;
-          case 'ev':
-            return <Ev setView={setView} />;
-        case 'endform':
+            case 'welcome':
+                return <Welcome setView={setView} />;
+            case 'form':
+                if (onBEstado === false) {
+                    return <div>Se completaron los formularios requeridos.</div>;
+                }
+                else { return <Form setView={setView} />; }
+            case 'func':
+                return <Func setView={setView} />;
+            case 'about':
+                return <About setView={setView} />;
+            case 'ev':
+                return <Ev setView={setView} />;
+            case 'endform':
                 return <EndForm setView={setView} />;
 
-          default:
-            return <Welcome setView={setView} />;
+            default:
+                return <Welcome setView={setView} />;
         }
-      };
+    };
 
     const getCargoName = (id) => {
         switch (id?.toString()) {
@@ -174,38 +179,37 @@ function Menu() {
         setNewProfilePhoto(null);
         setErrorMessage('');
     };
+
     return (
         <>
             <div className="cont">
                 <nav className="navbar navbar-expand-lg navbar-light bg-light">
                     <div className="container-fluid">
-                        <a className="navbar-brand" href="#">ANGKOR GROUP</a>
-                        <button className="navbar-toggler" type="button" onClick={toggleDropdown} aria-controls="navbarNavDropdown" aria-expanded={dropdownOpen} aria-label="Toggle navigation">
-                            <span className="navbar-toggler-icon"></span>
-                        </button>
-                        <div className={`collapse navbar-collapse ${dropdownOpen ? 'show' : ''}`} id="navbarNavDropdown">
-                            <ul className="navbar-nav ms-auto">
-                                <li className="nav-item dropdown" ref={dropdownRef}>
-                                    <a className="nav-link dropdown-toggle no-background" href="#" role="button" onClick={toggleDropdown} aria-expanded={dropdownOpen}>
-                                        <img src={isUpdating ? 'https://via.placeholder.com/30' : profilePhoto || 'https://via.placeholder.com/30'} alt="User Avatar" className="rounded-circle me-2" style={{ width: '30px', height: '30px' }} /> {cookies.get('nombre')} {cookies.get('apellido')}
-                                    </a>
-                                    <ul className={`dropdown-menu dropdown-menu-end ${dropdownOpen ? 'show' : ''}`} aria-labelledby="navbarDropdownMenuLink">
-                                        <li className="dropdown-header">Bienvenido, {cookies.get('nombre')} {cookies.get('apellido')}</li>
-                                        <li><a className="dropdown-item" href="#">{cargoName}</a></li>
-                                        <li><a className="dropdown-item" href="#">{cookies.get('email')}</a></li>
-                                        <li><hr className="dropdown-divider" /></li>
-                                        <li><a className="dropdown-item" href="#" onClick={handleShowProfile}>Ver Perfil</a></li>
-                                        <li><hr className="dropdown-divider" /></li>
-                                        <li><a className="dropdown-item" href="#" onClick={cerrarSesion}>Cerrar Sesión</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
+                      
+                        <div className="profile-container ms-auto d-flex align-items-center">
+                            <button className="navbar-toggler me-2" type="button" onClick={toggleSidebar}>
+                                <span className="navbar-toggler-icon"></span>
+                            </button>
+                            <div className="nav-item dropdown profile-dropdown" ref={dropdownRef}>
+                                <a className="nav-link dropdown-toggle no-background" href="#" role="button" onClick={toggleDropdown} aria-expanded={dropdownOpen}>
+                                    <img src={isUpdating ? 'https://via.placeholder.com/30' : profilePhoto || 'https://via.placeholder.com/30'} alt="User Avatar" className="rounded-circle profile-photo" />
+                                </a>
+                                <ul className={`dropdown-menu dropdown-menu-end ${dropdownOpen ? 'show' : ''}`} aria-labelledby="navbarDropdownMenuLink">
+                                    <li className="dropdown-header">Bienvenido, {cookies.get('nombre')} {cookies.get('apellido')}</li>
+                                    <li><a className="dropdown-item" href="#">{cargoName}</a></li>
+                                    <li><a className="dropdown-item" href="#">{cookies.get('email')}</a></li>
+                                    <li><hr className="dropdown-divider" /></li>
+                                    <li><a className="dropdown-item" href="#" onClick={handleShowProfile}>Ver Perfil</a></li>
+                                    <li><hr className="dropdown-divider" /></li>
+                                    <li><a className="dropdown-item" href="#" onClick={cerrarSesion}>Cerrar Sesión</a></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </nav>
                 <br />
                 <div className="wrapper d-flex">
-                    <nav id="sidebar">
+                    <nav id="sidebar" className={sidebarOpen ? 'active' : ''}>
                         <div className="sidebar-header">
                             <h3>ANGKOR GROUP</h3>
                             <strong>AG</strong>
@@ -244,8 +248,12 @@ function Menu() {
                             </li>
                         </ul>
                     </nav>
-                    <div id="content" >
-                        {renderComponent()}
+                    <div id="content">
+                        <TransitionGroup>
+                            <CSSTransition key={view} timeout={300} classNames="fade">
+                                {renderComponent()}
+                            </CSSTransition>
+                        </TransitionGroup>
                     </div>
                 </div>
             </div>

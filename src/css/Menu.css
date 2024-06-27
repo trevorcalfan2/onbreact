@@ -69,35 +69,35 @@ span {
 #sidebar {
     min-width: 250px;
     max-width: 250px;
-    background: #77ACF1;
+    background: #04009A;
     color: #fff;
     transition: all 0.3s;
-    position: fixed; /* Fija el sidebar en la pantalla */
-    top: 0; /* Alinea el sidebar con la parte superior */
+    position: fixed;
+    top: 0;
     left: 0;
-    height: 100vh; /* Asegura que el sidebar ocupe toda la altura de la ventana */
-    padding-top: 0; /* Elimina el padding superior */
+    height: 100vh;
+    padding-top: 0;
 }
 
 #sidebarCollapse {
     position: fixed;
     top: 15px;
-    left: 300px; /* Posición original del botón */
+    left: 300px;
     z-index: 1000;
-    transition: left 0.3s; /* Agrega una transición para suavizar el movimiento */
+    transition: left 0.3s;
 }
 
 #sidebar.active #sidebarCollapse {
-    left: calc(10px + 80px); /* Ajusta el valor según el ancho del sidebar colapsado */
+    left: calc(10px + 80px);
 }
 
 #sidebar.active #sidebarCollapse.left-collapsed {
-    left: 10px; /* Ajusta la posición cuando el sidebar está colapsado */
+    left: 10px;
 }
 
 #sidebar.active {
-    min-width: 80px;
-    max-width: 80px;
+    min-width: 110px;
+    max-width: 110px;
     text-align: center;
 }
 
@@ -142,7 +142,7 @@ span {
 
 #sidebar .sidebar-header {
     padding: 20px;
-    background: #405FF0;
+    background: #04009A;
 }
 
 #sidebar .sidebar-header strong {
@@ -249,11 +249,11 @@ a.article:hover {
     padding: 20px;
     min-height: 100vh;
     transition: all 0.3s;
-    margin-left: 250px; /* Deja espacio para el sidebar */
+    margin-left: 250px;
 }
 
 #sidebar.active + #content {
-    margin-left: 80px; /* Ajusta el margen cuando el sidebar está colapsado */
+    margin-left: 90px;
 }
 
 /* ---------------------------------------------------
@@ -265,7 +265,7 @@ a.article:hover {
         min-width: 80px;
         max-width: 80px;
         text-align: center;
-        margin-left: -80px !important;
+        margin-left: -125px !important;
     }
     .dropdown-toggle::after {
         top: auto;
@@ -298,6 +298,43 @@ a.article:hover {
     #sidebar ul ul a {
         padding: 10px !important;
     }  
+
+    /* Estilos para el contenedor del toggler y la foto de perfil */
+    .navbar-toggler,
+    .nav-item .nav-link {
+        margin-left: 10px;
+    }
+    .navbar-nav {
+        display: flex;
+        align-items: center;
+    }
+    .nav-item .nav-link img {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+    }
+
+    /* Hide sidebar by default on small screens */
+    .wrapper {
+        flex-direction: column;
+    }
+   
+    #sidebar.show {
+        display: block;
+        position: absolute;
+        z-index: 9999;
+        width: 80%;
+        left: 0;
+        top: 0;
+        height: 100%;
+    }
+    #content {
+        margin-left: 0;
+        width: 100%;
+    }
+    #sidebarCollapse {
+        display: block;
+    }
 }
 
 /* ---------------------------------------------------
@@ -307,11 +344,11 @@ a.article:hover {
 /* Asegura que el dropdown no cause desbordamientos */
 .dropdown-menu {
     position: absolute;
-    top: 100%; /* Asegura que el dropdown se posicione correctamente */
+    top: 100%;
     left: auto;
     right: 0;
     z-index: 1000;
-    display: none; /* Oculta el dropdown por defecto */
+    display: none;
     float: left;
     min-width: 10rem;
     padding: 0.5rem 0;
@@ -355,57 +392,128 @@ a.article:hover {
     align-items: center;
     position: fixed;
     z-index: 1050;
-    left: 0;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    outline: 0;
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .custom-modal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1200px;
+    pointer-events: auto;
     background-color: #fff;
-    margin: auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 600px;
-    border-radius: 5px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    animation-name: modalopen;
-    animation-duration: 0.4s;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 0.3rem;
+    outline: 0;
 }
 
-@keyframes modalopen {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
+.custom-modal .close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: 0.5;
     cursor: pointer;
 }
 
-.modal-header {
-    border-bottom: 1px solid #dee2e6;
-    margin-bottom: 10px;
+.custom-modal .close:hover {
+    color: #000;
+    text-decoration: none;
 }
 
-.modal-footer {
+.custom-modal .modal-header,
+.custom-modal .modal-body,
+.custom-modal .modal-footer {
+    padding: 1rem;
+}
+
+.custom-modal .modal-header {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.custom-modal .modal-title {
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+
+.custom-modal .modal-body {
+    position: relative;
+    flex: 1 1 auto;
+}
+
+.custom-modal .modal-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
     border-top: 1px solid #dee2e6;
-    margin-top: 10px;
-    text-align: right;
+}
+
+/* ---------------------------------------------------
+    PROFILE PHOTO STYLE
+----------------------------------------------------- */
+
+
+.nav-item .nav-link img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;object-fit: cover;
+}
+
+@media (max-width: 768px) {
+    .navbar .navbar-nav .nav-item .nav-link img {
+        width: 30px;
+        height: 30px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .custom-modal .custom-modal-content {
+        width: 90%;
+        max-width: none;
+        padding: 10px;
+        overflow-y: auto; /* Hacer que el contenido sea desplazable */
+        max-height: 90vh; /* Limitar la altura máxima del modal */
+    }
+
+    .custom-modal .modal-header,
+    .custom-modal .modal-body,
+    .custom-modal .modal-footer {
+        padding: 10px;
+    }
+
+    .custom-modal .modal-body .row {
+        flex-direction: column;
+    }
+
+    .custom-modal .modal-body .col-md-6 {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .custom-modal .modal-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .custom-modal .modal-footer .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .custom-modal .close {
+        top: 5px;
+        right: 5px;
+    }
 }

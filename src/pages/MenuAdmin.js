@@ -3,7 +3,7 @@ import Cookies from 'universal-cookie';
 import { useNavigate } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import '../css/MenuAdmin.css';
+import '../css/Menu.css';
 import Dashboard from '../components/AdminView/Dashboard';
 import User from '../components/UserCrud/User';
 import CreateUser from '../components/UserCrud/CreateUser';

@@ -195,6 +195,23 @@ const Func = ({ setView }) => {
         }
     };
 
+    const scrollToActiveStep = () => {
+        const activeStep = document.querySelector('.progress-step.active');
+        if (activeStep) {
+            const progressBar = document.querySelector('.progressbar');
+            const offsetLeft = activeStep.offsetLeft;
+            const scrollLeft = offsetLeft - (window.innerWidth / 2 - activeStep.clientWidth / 2);
+            progressBar.scrollTo({
+                left: scrollLeft,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    useEffect(() => {
+        scrollToActiveStep();
+    }, [page]);
+
     return (
         <div className="form">
             <div className="progressbar">
@@ -233,7 +250,7 @@ const Func = ({ setView }) => {
                             </label>
                         </div>
                     )}
-                </div>
+                </div><br/>
                 <div className="footer">
                     <div className="button-container">
                         <button

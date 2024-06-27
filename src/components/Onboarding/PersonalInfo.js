@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../css/Index.css';
-import '../../css/PersonalInfo.css';
+
 
 function PersonalInfo({ formData, setFormData }) {
   const [dateTime, setDateTime] = useState("");
@@ -62,15 +62,17 @@ function PersonalInfo({ formData, setFormData }) {
       <div className="row">
         <div className="col-md-6 text-center mb-4">
           <h2 className="mb-4 text-light">Foto de Perfil</h2>
-          <input
-            type="file"
-            className="btn btn-primary mb-3"
-            onChange={handleProfilePhotoChange}
-            accept=".jpg,.jpeg,.png"
-          />
-          {profilePhoto && (
-            <img src={profilePhoto} alt="Foto de Perfil" className="img-thumbnail mb-3" style={{ maxHeight: '200px', maxWidth: '100%' }} />
-          )}
+          <div className="file-input-container">
+            <input
+              type="file"
+              className="btn btn-primary mb-3"
+              onChange={handleProfilePhotoChange}
+              accept=".jpg,.jpeg,.png"
+            />
+            {profilePhoto && (
+              <img src={profilePhoto} alt="Foto de Perfil" className="img-thumbnail mb-3" style={{ maxHeight: '200px', maxWidth: '100%' }} />
+            )}
+          </div>
         </div>
         <div className="col-md-6">
           <div className="form-group mb-3">
@@ -183,16 +185,18 @@ function PersonalInfo({ formData, setFormData }) {
           </div>
           <div className="form-group mb-3">
             <label htmlFor="fotoDni" className="text-light">Subir Foto DNI</label>
-            <input
-              type="file"
-              className="form-control-file"
-              id="fotoDni"
-              onChange={handleFileChange}
-              accept=".jpg,.jpeg,.png"
-            />
-            {formData.fotoDni && (
-              <img src={formData.fotoDni} alt="Foto DNI" className="img-thumbnail mt-3" style={{ maxHeight: '150px', maxWidth: '100%' }} />
-            )}
+            <div className="file-input-container">
+              <input
+                type="file"
+                className="form-control-file"
+                id="fotoDni"
+                onChange={handleFileChange}
+                accept=".jpg,.jpeg,.png"
+              />
+              {formData.fotoDni && (
+                <img src={formData.fotoDni} alt="Foto DNI" className="img-thumbnail mt-3" style={{ maxHeight: '150px', maxWidth: '100%' }} />
+              )}
+            </div>
           </div>
         </div>
       </div>

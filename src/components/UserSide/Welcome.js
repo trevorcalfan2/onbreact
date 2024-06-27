@@ -43,7 +43,7 @@ const Welcome = ({ setView }) => {
     };
 
     return (
-        <div>
+       <div className="container d-flex justify-content-center">
             <div className='welcome-container'>
                 <div className="row">
                     <div className="col-md-6 text-section">
@@ -59,6 +59,12 @@ const Welcome = ({ setView }) => {
                         ></iframe>
                     </div>
                 </div>
+
+
+
+
+
+                
                 <div className="row mt-3">
                     <div className="col-md-12 d-flex justify-content-end">
                         <button
